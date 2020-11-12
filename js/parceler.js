@@ -1,5 +1,6 @@
-SSHyClient.parceler = function (web_socket, transport) {
+SSHyClient.parceler = function (web_socket, transport, sendBinaryString) {
   this.socket = web_socket;
+  this.sendBinaryString = sendBinaryString;
   this.transport = transport;
   this.encrypting = false;
 
@@ -37,8 +38,8 @@ SSHyClient.parceler.prototype = {
       packet = encrypted_packet + SSHyClient.hash.HMAC(this.outbound_mac_key, struct.pack('I', this.outbound_sequence_num) + packet, this.hmacSHAVersion);
     }
 
-    // Now send it as a base64 string
-    this.socket.sendB64(packet);
+    // Now send it
+    this.sendBinaryString(packet);
 
     this.outbound_sequence_num++;
   },

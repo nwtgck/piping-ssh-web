@@ -156,13 +156,6 @@ function startSSHy() {
       term.write('WebSocket connection failed: Error in connection establishment: code ' + e.code);
     }
   };
-  // Just a little abstraction from ws.send
-  ws.sendB64 = function (e) {
-    this.send(btoa(e));
-
-    transport.parceler.transmitData += e.length;
-    transport.settings.setNetTraffic(transport.parceler.transmitData, false);
-  };
 }
 
 // Initialises xtermjs

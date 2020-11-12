@@ -264,30 +264,6 @@
       wsproxyURL += html_ipaddress + ':' + html_port
       ws = new WebSocket(wsproxyURL, 'base64');
 
-      // Sets up websocket listeners
-      ws.onopen = function (e) {
-        transport = new SSHyClient.Transport(ws, settings);
-        transport.auth.termUsername = termUsername;
-        transport.auth.termPassword = termPassword;
-        transport.auth.hostname = html_ipaddress;
-      };
-
-      (async () => {
-        const res = await fetch(`${pipingServerUrl}/${path2}`);
-        const reader = res.body.getReader();
-        while(true) {
-          const {value, done} = await reader.read();
-          if (done) break;
-          const str = uint8ArrayToString(value);
-          if(true) transport.parceler.handle(str);
-        }
-      })();
-
-      // Send all recieved messages to SSHyClient.Transport.handle()
-      ws.onmessage = function (e) {
-        // // Convert the recieved data from base64 to a string
-        // transport.parceler.handle(atob(e.data));
-      };
       // Whenever the websocket is closed make sure to display an error if appropriate
       ws.onclose = function (e) {
         // Set the sidenav websocket proxy color to yellow
@@ -317,22 +293,33 @@
         }
       });
 
+      function sendBinaryString(binaryString) {
+        controller.enqueue(stringToUint8Array(binaryString));
+        transport.parceler.transmitData += binaryString.length;
+        settings.setNetTraffic(transport.parceler.transmitData, false);
+      }
+
       (async () => {
-        await fetch(`${pipingServerUrl}/${path1}`, {
+        fetch(`${pipingServerUrl}/${path1}`, {
           method: "POST",
           body: readable,
           allowHTTP1ForStreamingUpload: true,
         });
+
+        transport = new SSHyClient.Transport(ws, settings, sendBinaryString);
+        transport.auth.termUsername = termUsername;
+        transport.auth.termPassword = termPassword;
+        transport.auth.hostname = html_ipaddress;
+
+        const res = await fetch(`${pipingServerUrl}/${path2}`);
+        const reader = res.body.getReader();
+        while(true) {
+          const {value, done} = await reader.read();
+          if (done) break;
+          const str = uint8ArrayToString(value);
+          transport.parceler.handle(str);
+        }
       })();
-
-
-      // Just a little abstraction from ws.send
-      ws.sendB64 = function (e) {
-        controller.enqueue(stringToUint8Array(e));
-
-        transport.parceler.transmitData += e.length;
-        settings.setNetTraffic(transport.parceler.transmitData, false);
-      };
 
       // Set the sidenav websocket proxy color to green
       document.getElementById('websockURL').classList.add('brightgreen')
