@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>SSHy.us</title>
+  <title>Piping SSH</title>
 
   <script type="text/javascript">
     var wsproxyURL = "localhost"
@@ -194,11 +194,46 @@
       document.getElementById('failure').style.display = "block"
     }
 
+    function setClientHint() {
+      const hintTextarea = document.getElementById('server_host_command_hint');
+      const pipingServerUrl = document.getElementById('piping_server').value;
+      const path1 = document.getElementById('path1').value;
+      const path2 = document.getElementById('path2').value;
+
+      if (path1 === '' || path2 === '') return;
+
+      const escapedPipingServerUrl = pipingServerUrl.replace(/:/g, '\\:').replace(/\/$/, '') ;
+
+      const socatCommand = `socat 'EXEC:curl -NsS ${escapedPipingServerUrl}/${path1}!!EXEC:curl -NsST - ${escapedPipingServerUrl}/${path2}' TCP:127.0.0.1:22`
+
+      hintTextarea.value = socatCommand;
+    }
+
+    function stringToUint8Array(str) {
+      const numbers= [].map.call(str, (c) => {
+        return c.charCodeAt(0);
+      });
+      return new Uint8Array(numbers);
+    }
+
+    // (base: https://stackoverflow.com/a/12713326/2885946)
+    function uint8ArrayToString(uint8Arr) {
+      const CHUNK_SZ = 0x8000;
+      const c = [];
+      for (let i = 0; i < uint8Arr.length; i+=CHUNK_SZ) {
+        c.push(String.fromCharCode.apply(null, uint8Arr.subarray(i, i + CHUNK_SZ)));
+      }
+      return c.join("");
+    }
+
     // Starts the SSH client in scripts/transport.js
     function startSSHy() {
       var html_ipaddress = document.getElementById('ipaddress').value
       var termUsername = document.getElementById('username').value
       var termPassword = document.getElementById('password').value
+      const pipingServerUrl = document.getElementById('piping_server').value.replace(/\/$/, '');
+      const path1 = document.getElementById('path1').value;
+      const path2 = document.getElementById('path2').value;
 
       // find the port number
       if (html_ipaddress.includes(':')) {
@@ -236,10 +271,22 @@
         transport.auth.termPassword = termPassword;
         transport.auth.hostname = html_ipaddress;
       };
+
+      (async () => {
+        const res = await fetch(`${pipingServerUrl}/${path2}`);
+        const reader = res.body.getReader();
+        while(true) {
+          const {value, done} = await reader.read();
+          if (done) break;
+          const str = uint8ArrayToString(value);
+          if(true) transport.parceler.handle(str);
+        }
+      })();
+
       // Send all recieved messages to SSHyClient.Transport.handle()
       ws.onmessage = function (e) {
-        // Convert the recieved data from base64 to a string
-        transport.parceler.handle(atob(e.data));
+        // // Convert the recieved data from base64 to a string
+        // transport.parceler.handle(atob(e.data));
       };
       // Whenever the websocket is closed make sure to display an error if appropriate
       ws.onclose = function (e) {
@@ -262,9 +309,26 @@
           term.write('WebSocket connection failed: Error in connection establishment: code ' + e.code);
         }
       };
+
+      let controller = null;
+      const readable = new ReadableStream({
+        start(ctrl) {
+          controller = ctrl;
+        }
+      });
+
+      (async () => {
+        await fetch(`${pipingServerUrl}/${path1}`, {
+          method: "POST",
+          body: readable,
+          allowHTTP1ForStreamingUpload: true,
+        });
+      })();
+
+
       // Just a little abstraction from ws.send
       ws.sendB64 = function (e) {
-        this.send(btoa(e));
+        controller.enqueue(stringToUint8Array(e));
 
         transport.parceler.transmitData += e.length;
         settings.setNetTraffic(transport.parceler.transmitData, false);
@@ -433,7 +497,8 @@
     <span class="title" style="padding-top:20px;">Host Key</span>
     <span id="hostKeyImg" class="hostKeyImg"></span>
   </div>
-  <span class="footer">
+  <!-- TODO: remove -->
+  <span class="footer" style="display: none">
 			<span class="title">Websocket Proxy</span>
 			<div class="fileUpload btn btn-primary">
 				<span class="tooltiptext">Websocket Proxy URL</span>
@@ -446,27 +511,44 @@
 <div id="login_cred" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2><span class="icon-lock"></span> SSHv2 Login</h2>
+      <h2><span class="icon-lock"></span> Piping SSH</h2>
     </div>
     <div class="modal-body">
       <table style="width: 100%">
         <tr>
-          <td><span class="icon-address-book"></span> IP Address:</td>
+          <td><span class=""></span> Piping Server:</td>
+          <td><input type="text" id="piping_server" oninput="setClientHint()" value="https://ppng.io" style="width: 90%"
+                     autofocus></td>
+        </tr>
+        <tr>
+          <td><span class=""></span> Path1:</td>
+          <td><input type="text" id="path1" oninput="setClientHint()" placeholder="aaa" style="width: 90%"></td>
+        </tr>
+        <tr>
+          <td><span class=""></span> Path2:</td>
+          <td><input type="text" id="path2" oninput="setClientHint()" placeholder="bbb" style="width: 90%"></td>
+        </tr>
+        <!-- TODO: remove  -->
+        <tr style="display: none">
+          <td><span class=""></span> IP Address:</td>
           <td><input type="text" id="ipaddress" placeholder="sshy.us(:22)" style="width: 90%"
                      onblur="validate(this.id, this.value)" autofocus></td>
         </tr>
         <tr>
-          <td><span class="icon-user-circle-o"></span> Username:</td>
+          <td><span class=""></span> Username:</td>
           <td><input type="text" id="username" placeholder="username" style="width: 90%"
                      onblur="validate(this.id, this.value)"></td>
         </tr>
         <tr>
-          <td><span class="icon-eye"></span> Password:</td>
+          <td><span class=""></span> Password:</td>
           <td><input type="password" id="password" style="width: 90%" onblur="validate(this.id, this.value)"></td>
         </tr>
       </table>
       <i id="failure" class="failure"></i>
       <input type="button" id="connect" class="button" value="Connect" onclick="startSSHy()">
+      <hr>
+      <div>Command hint</div>
+      <textarea id="server_host_command_hint" style="width: 100%" placeholder="..."></textarea>
     </div>
   </div>
   <div id="load-container" class="load-container">
