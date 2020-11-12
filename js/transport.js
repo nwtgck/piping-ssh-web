@@ -223,15 +223,10 @@ SSHyClient.Transport.prototype = {
     m.add_bytes(String.fromCharCode(SSHyClient.MSG_DISCONNECT));
     m.add_int(reason);
     this.send_packet(m.toString());
-    ws.close();
     term.write("\r\nConnection to " + this.auth.hostname + " closed. Code - " + reason);
   },
   // Sends a null packet to the SSH server to keep the connection alive
   keepAlive: function () {
-    // Make sure the websocket is still open
-    if (ws.readyState === 3) {
-      return;
-    }
     var m = new SSHyClient.Message();
     m.add_bytes(String.fromCharCode(SSHyClient.MSG_IGNORE));
     m.add_string('');
