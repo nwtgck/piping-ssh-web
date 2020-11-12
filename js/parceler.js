@@ -1,5 +1,4 @@
-SSHyClient.parceler = function (web_socket, transport, sendBinaryString) {
-  this.socket = web_socket;
+SSHyClient.parceler = function (transport, sendBinaryString) {
   this.sendBinaryString = sendBinaryString;
   this.transport = transport;
   this.encrypting = false;

@@ -1,4 +1,4 @@
-SSHyClient.Transport = function (ws, settings, sendBinaryString) {
+SSHyClient.Transport = function (settings, sendBinaryString) {
   this.local_version = 'SSH-2.0-SSHyClient';
   this.remote_version = '';
 
@@ -21,7 +21,7 @@ SSHyClient.Transport = function (ws, settings, sendBinaryString) {
   this.preferred_hash = null;
 
   // Other SSHyClient module classes
-  this.parceler = new SSHyClient.parceler(ws, this, sendBinaryString);
+  this.parceler = new SSHyClient.parceler(this, sendBinaryString);
   this.auth = new SSHyClient.auth(this.parceler);
   this.settings = settings === undefined ? new SSHyClient.settings() : settings;
 

@@ -76,7 +76,7 @@ SSHyClient.kex.DiffieHellman.prototype = {
     var host_key = r.get_string();
     if (transport.settings.rsaCheckEnabled) {
       // Now lets make sure that the host_key is recognised, firstly we'll pre-fetch all the data we require (ip/port/rsaKey)
-      var key = wsproxyURL.split('/')[3];
+      var key = undefined;
       // Cache the hexified host key
       var hexHostKey = ascii2hex(host_key);
       // Generate the short MD5'd key for randomart and confirm

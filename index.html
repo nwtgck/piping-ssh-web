@@ -6,11 +6,7 @@
   <title>Piping SSH</title>
 
   <script type="text/javascript">
-    var wsproxyURL = "localhost"
-    var wsproxyPorts = {"ws": 5999, "wss": 6001}
-    var wsproxyProto = "ws"
-
-    var ws, transport, settings, term = null;
+    var transport, settings, term = null;
 
     // Test IE 11
     if (window.msCrypto) {
@@ -48,9 +44,6 @@
       // Apply fit addon
       fit.apply(Terminal)
 
-      // Build the default wsProxy URL for display on sidenav
-      buildWSProxyURL()
-
       // Connect upon hitting Enter from the password field
       document.getElementById("password").addEventListener("keyup", function (event) {
         if (event.key !== "Enter") return;
@@ -69,41 +62,6 @@
     function resize() {
       if (term) {
         term.fit()
-      }
-    }
-
-    // Build the entire websocket url eg (wss://localhost:5999/) based on http protocol
-    function buildWSProxyURL(portPassed) {
-      // Decide if we're using secure ws or not
-      if (window.location.protocol == "https:") {
-        wsproxyProto = "wss"
-      }
-
-      var port
-      if (portPassed) {
-        port = ""
-      } else {
-        port = ':' + wsproxyPorts[wsproxyProto]
-      }
-
-      // Build the wsproxyURL up
-      wsproxyURL = wsproxyProto + '://' + wsproxyURL + port + '/'
-
-      document.getElementById("websockURL").value = wsproxyURL
-    }
-
-    // Changes the websocket proxy URL ** BEFORE ** connection ONLY
-    function modProxyURL(newURL) {
-      if (!ws) {
-        // Strip it down to barebones URL:PORT(optional)
-        matches = /^w?s{0,2}:?\/{0,2}(([a-z0-9]+\.)*[a-z0-9]+\.?[a-z]+)\:?([0-9]{1,5})?/g.exec(newURL)
-        var port = ""
-        if (newURL.match(":")) {
-          port = ":" + matches[matches.length - 1]
-        }
-
-        wsproxyURL = matches[1] + port;
-        buildWSProxyURL(port)
       }
     }
 
@@ -255,36 +213,8 @@
       document.getElementById('connect').value = 'Connecting...'
       document.getElementById('load-container').style.display = "block"
 
-      // Disable websocket proxy modifications
-      document.getElementById('websockURL').disabled = true
-
       // Initialise the window title
       document.title = "SSHy Client";
-      // Opens the websocket!
-      wsproxyURL += html_ipaddress + ':' + html_port
-      ws = new WebSocket(wsproxyURL, 'base64');
-
-      // Whenever the websocket is closed make sure to display an error if appropriate
-      ws.onclose = function (e) {
-        // Set the sidenav websocket proxy color to yellow
-        document.getElementById('websockURL').classList.remove('brightgreen')
-        document.getElementById('websockURL').classList.add('brightyellow')
-        if (term) {
-          // Don't display an error if SSH transport has already detected a graceful exit
-          if (transport.closing) {
-            return;
-          }
-          term.write('\n\n\rWebsocket connection to ' + transport.auth.hostname + ' was unexpectedly closed.');
-          // If there is no keepAliveInterval then inform users they can use it
-          if (!settings.keepAliveInterval) {
-            term.write('\n\n\rThis was likely caused by he remote SSH server timing out the session due to inactivity.\r\n- Session Keep Alive interval can be set in the settings to prevent this behaviour.');
-          }
-        } else {
-          // Since no terminal exists we need to initialse one before being able to write the error
-          termInit();
-          term.write('WebSocket connection failed: Error in connection establishment: code ' + e.code);
-        }
-      };
 
       let controller = null;
       const readable = new ReadableStream({
@@ -306,7 +236,7 @@
           allowHTTP1ForStreamingUpload: true,
         });
 
-        transport = new SSHyClient.Transport(ws, settings, sendBinaryString);
+        transport = new SSHyClient.Transport(settings, sendBinaryString);
         transport.auth.termUsername = termUsername;
         transport.auth.termPassword = termPassword;
         transport.auth.hostname = html_ipaddress;
@@ -320,9 +250,6 @@
           transport.parceler.handle(str);
         }
       })();
-
-      // Set the sidenav websocket proxy color to green
-      document.getElementById('websockURL').classList.add('brightgreen')
     }
 
     // Initialises xtermjs
@@ -359,7 +286,7 @@
       // sets up some listeners for the terminal (keydown, paste)
       term.textarea.onkeydown = function (e) {
         // Sanity Checks
-        if (!ws || !transport || transport.auth.failedAttempts >= 5 || transport.auth.awaitingAuthentication) {
+        if (!transport || transport.auth.failedAttempts >= 5 || transport.auth.awaitingAuthentication) {
           return;
         }
 
@@ -484,14 +411,6 @@
     <span class="title" style="padding-top:20px;">Host Key</span>
     <span id="hostKeyImg" class="hostKeyImg"></span>
   </div>
-  <!-- TODO: remove -->
-  <span class="footer" style="display: none">
-			<span class="title">Websocket Proxy</span>
-			<div class="fileUpload btn btn-primary">
-				<span class="tooltiptext">Websocket Proxy URL</span>
-				<input type="text" class="large" id="websockURL" onchange="modProxyURL(this.value)">
-			</div>
-		</span>
 </div>
 <span id="gear" class="gear" style="visibility:visible;" onclick="toggleNav(250)">&#9881</span>
 
