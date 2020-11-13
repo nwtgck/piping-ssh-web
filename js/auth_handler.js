@@ -50,9 +50,10 @@ SSHyClient.auth.prototype = {
       if (!term) {
         startxtermjs();
       }
-      // Starts up the keep alive interval to 60s
-      transport.settings.setKeepAlive(60);
-      document.getElementById('keepAlive').value = 60;
+      // Starts up the keep alive interval to 30s
+      // NOTE: Chrome quits a HTTP request when received no bytes in 60s
+      transport.settings.setKeepAlive(30);
+      document.getElementById('keepAlive').value = 30;
       // We've been authenticated, lets open a channel
       this.open_channel('session');
     }
