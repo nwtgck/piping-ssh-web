@@ -62,7 +62,7 @@
       const pathLen = 3;
       document.getElementById('path1').value = randomString(pathLen);
       document.getElementById('path2').value = randomString(pathLen);
-      setClientHint();
+      setCommandHint();
 
       // Sets the default colorScheme to material
       settings = new SSHyClient.settings();
@@ -130,7 +130,7 @@
       document.getElementById('failure').style.display = "block"
     }
 
-    function setClientHint() {
+    function setCommandHint() {
       const hintTextarea = document.getElementById('server_host_command_hint');
       const pipingServerUrl = document.getElementById('piping_server').value;
       const path1 = document.getElementById('path1').value;
@@ -395,16 +395,16 @@
       <table style="width: 100%">
         <tr>
           <td><span class=""></span> Piping Server:</td>
-          <td><input type="text" id="piping_server" oninput="setClientHint()" value="https://ppng.io" style="width: 90%"
+          <td><input type="text" id="piping_server" oninput="setCommandHint()" value="https://ppng.io" style="width: 90%"
                      autofocus></td>
         </tr>
         <tr>
           <td><span class=""></span> Path1:</td>
-          <td><input type="text" id="path1" oninput="setClientHint()" placeholder="aaa" style="width: 90%"></td>
+          <td><input type="text" id="path1" oninput="setCommandHint()" placeholder="aaa" style="width: 90%"></td>
         </tr>
         <tr>
           <td><span class=""></span> Path2:</td>
-          <td><input type="text" id="path2" oninput="setClientHint()" placeholder="bbb" style="width: 90%"></td>
+          <td><input type="text" id="path2" oninput="setCommandHint()" placeholder="bbb" style="width: 90%"></td>
         </tr>
         <tr>
           <td><span class=""></span> Username:</td>
