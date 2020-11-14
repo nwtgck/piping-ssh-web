@@ -42,6 +42,21 @@
     }
 
     window.onload = function () {
+      // (base: https://web.dev/fetch-upload-streaming/#feature-detection)
+      const supportsRequestStreams = !new Request('', {
+        body: new ReadableStream(),
+        method: 'POST',
+      }).headers.has('Content-Type');
+
+      // If not support fetch() upload streaming
+      if (!supportsRequestStreams) {
+        // Hide login card
+        document.getElementById('login_cred').style.display = "none";
+        // Show message
+        document.getElementById('not_supported_message').style.display = null;
+        return;
+      }
+
       document.getElementById('login_cred').style.display = "block";
 
       const pathLen = 3;
@@ -366,6 +381,11 @@
 </div>
 <span id="gear" class="gear" style="visibility:visible;" onclick="toggleNav(250)">&#9881</span>
 
+<pre id="not_supported_message" style="display: none; text-align: center; color: white; margin-bottom: 2em;">
+  ⚠️ This browser does not supported.
+  Use Google Chrome 85 or above and enable new feature by:
+  "chrome://flags/ > Experimental Web Platform features > Enabled"
+</pre>
 <div id="login_cred" class="modal">
   <div class="modal-content">
     <div class="modal-header">
