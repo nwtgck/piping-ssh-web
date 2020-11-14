@@ -223,7 +223,7 @@ SSHyClient.Transport.prototype = {
     m.add_bytes(String.fromCharCode(SSHyClient.MSG_DISCONNECT));
     m.add_int(reason);
     this.send_packet(m.toString());
-    term.write("\r\nConnection to " + this.auth.hostname + " closed. Code - " + reason);
+    term.write("\r\nConnection to SSH server closed. Code - " + reason);
   },
   // Sends a null packet to the SSH server to keep the connection alive
   keepAlive: function () {

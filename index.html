@@ -78,46 +78,9 @@
       element.visibility = element.visibility === "hidden" ? "visible" : "hidden";
     }
 
-    // Rudimentary checks that an IP address is external and is a valid hostname or IP address
     function validate(id, text) {
       if (!text) {
         document.getElementById(id).style.borderBottom = 'solid 2px #ff4d4d'
-      } else {
-        if (id == "ipaddress") {
-          // incase we have a error for the port
-          if (text.includes(':')) {
-            if (!validate_port(text.split(':')[1])) {
-              document.getElementById(id).style.borderBottom = 'solid 2px #ff4d4d'
-              return
-            } else {
-              document.getElementById(id).style.borderBottom = 'solid 2px #c9c9c9'
-              document.getElementById('failure').style.display = "none"
-            }
-          } else {
-            // if we're not doing ports then hide the failure message
-            document.getElementById('failure').style.display = "none"
-          }
-          // test for valid domain name
-          if (!/^([a-z0-9]+\.)*[a-z0-9]+\.[a-z]+(\:[0-9]{1,5})?$/.test(text)) {
-            if (check_internal(text)) {
-              display_error("Be aware - IP addresses are resolved at the websocket proxy")
-            }
-            // test ip aswell.
-            if (!/^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$|(\:[0-9]{1,5}))){4}$/.test(text)) {
-              document.getElementById(id).style.borderBottom = 'solid 2px #ff4d4d'
-              return
-            } else {
-              if (check_internal(text)) {
-                display_error("Could no resolve hostname: Please use an external address")
-              }
-              document.getElementById(id).style.borderBottom = 'solid 2px #c9c9c9'
-              return
-            }
-            document.getElementById(id).style.borderBottom = 'solid 2px #ff4d4d'
-            return
-          }
-        }
-        document.getElementById(id).style.borderBottom = 'solid 2px #c9c9c9'
       }
     }
 
@@ -127,19 +90,7 @@
         return port_num
       } else {
         display_error("Invalid port: port must be between 1 - 65535")
-        validate('ipaddress', '')
       }
-    }
-
-    // checks for 10.*.*.*, 192.168.*.*, 172.16.*.*, 127.0.0.1 & loocalhost
-    function check_internal(ip_address) {
-      if (/10\.\d+\.\d+\.\d+/.test(ip_address) || /192\.168\.\d+\.\d+/.test(ip_address) || /172\.16\.\d+\.\d+/.test(ip_address)) {
-        return true
-      } else if (ip_address == '127.0.0.1' || ip_address == 'localhost') {
-        return true
-      }
-
-      return false
     }
 
     // Displays a given err on the page
@@ -186,21 +137,11 @@
 
     // Starts the SSH client in scripts/transport.js
     function startSSHy() {
-      var html_ipaddress = document.getElementById('ipaddress').value
       var termUsername = document.getElementById('username').value
       var termPassword = document.getElementById('password').value
       const pipingServerUrl = document.getElementById('piping_server').value.replace(/\/$/, '');
       const path1 = document.getElementById('path1').value;
       const path2 = document.getElementById('path2').value;
-
-      // find the port number
-      if (html_ipaddress.includes(':')) {
-        var split = html_ipaddress.split(':')
-        html_ipaddress = split[0]
-        html_port = validate_port(split[1])
-      } else {
-        html_port = 22
-      }
 
       if (termUsername.length == 0 || termPassword.length == 0) {
         validate('username', termUsername)
@@ -239,7 +180,6 @@
         transport = new SSHyClient.Transport(settings, sendBinaryString);
         transport.auth.termUsername = termUsername;
         transport.auth.termPassword = termPassword;
-        transport.auth.hostname = html_ipaddress;
 
         const res = await fetch(`${pipingServerUrl}/${path2}`);
         const reader = res.body.getReader();
@@ -433,12 +373,6 @@
         <tr>
           <td><span class=""></span> Path2:</td>
           <td><input type="text" id="path2" oninput="setClientHint()" placeholder="bbb" style="width: 90%"></td>
-        </tr>
-        <!-- TODO: remove  -->
-        <tr style="display: none">
-          <td><span class=""></span> IP Address:</td>
-          <td><input type="text" id="ipaddress" placeholder="sshy.us(:22)" style="width: 90%"
-                     onblur="validate(this.id, this.value)" autofocus></td>
         </tr>
         <tr>
           <td><span class=""></span> Username:</td>
