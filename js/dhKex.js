@@ -76,7 +76,7 @@ SSHyClient.kex.DiffieHellman.prototype = {
     var host_key = r.get_string();
     if (transport.settings.rsaCheckEnabled) {
       // Now lets make sure that the host_key is recognised, firstly we'll pre-fetch all the data we require (ip/port/rsaKey)
-      var key = undefined;
+      var key = 'PIPING_SSH_HOST_KEY';
       // Cache the hexified host key
       var hexHostKey = ascii2hex(host_key);
       // Generate the short MD5'd key for randomart and confirm
@@ -85,7 +85,7 @@ SSHyClient.kex.DiffieHellman.prototype = {
       // Create the randomArt image
       randomart(shortKey);
 
-      // Since we've got everthing we need lets see if the key exists already
+      // Since we've got everything we need lets see if the key exists already
       var localObj = localStorage.getItem(key);
 
       if (localObj) {
