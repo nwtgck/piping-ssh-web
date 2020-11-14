@@ -95,8 +95,6 @@ SSHyClient.kex.DiffieHellman.prototype = {
             // User has agree'd to the new host key so lets save it for them
             localStorage.setItem(key, hexHostKey);
           } else {
-            // Close the connection
-            ws.close();
             throw 'Error: Locally stored rsa key does not match remote key';
           }
         }
@@ -106,8 +104,6 @@ SSHyClient.kex.DiffieHellman.prototype = {
           // User has confirmed it is correct so save the RSA key
           localStorage.setItem(key, hexHostKey);
         } else {
-          // need to disconnect and kill the connection
-          ws.close();
           throw 'User has declined the rsa-key and closed the connection';
         }
       }
