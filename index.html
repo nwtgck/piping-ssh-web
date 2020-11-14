@@ -35,8 +35,20 @@
   <script type="text/javascript" src="js/combinedLibs.comb.js" async></script>
 
   <script type="text/javascript">
+    function randomString(len){
+      const nonConfusingChars = ["a", "b", "c", "d", "e", "f", "h", "i", "j", "k", "m", "n", "p", "r", "s", "t", "u", "v", "w", "x", "y", "z", "2", "3", "4", "5", "6", "7", "8"];
+      const randomArr = window.crypto.getRandomValues(new Uint32Array(len));
+      return Array.from(randomArr).map(n => nonConfusingChars[n % nonConfusingChars.length]).join('');
+    }
+
     window.onload = function () {
       document.getElementById('login_cred').style.display = "block";
+
+      const pathLen = 3;
+      document.getElementById('path1').value = randomString(pathLen);
+      document.getElementById('path2').value = randomString(pathLen);
+      setClientHint();
+
       // Sets the default colorScheme to material
       settings = new SSHyClient.settings();
       settings.setColorScheme(1);
