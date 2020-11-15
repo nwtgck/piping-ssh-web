@@ -3,14 +3,10 @@
 
 <head>
   <meta charset="utf-8">
-  <title>SSHy.us</title>
+  <title>Piping SSH</title>
 
   <script type="text/javascript">
-    var wsproxyURL = "localhost"
-    var wsproxyPorts = {"ws": 5999, "wss": 6001}
-    var wsproxyProto = "ws"
-
-    var ws, transport, settings, term = null;
+    var transport, settings, term = null;
 
     // Test IE 11
     if (window.msCrypto) {
@@ -39,17 +35,41 @@
   <script type="text/javascript" src="js/combinedLibs.comb.js" async></script>
 
   <script type="text/javascript">
+    function randomString(len){
+      const nonConfusingChars = ["a", "b", "c", "d", "e", "f", "h", "i", "j", "k", "m", "n", "p", "r", "s", "t", "u", "v", "w", "x", "y", "z", "2", "3", "4", "5", "6", "7", "8"];
+      const randomArr = window.crypto.getRandomValues(new Uint32Array(len));
+      return Array.from(randomArr).map(n => nonConfusingChars[n % nonConfusingChars.length]).join('');
+    }
+
     window.onload = function () {
+      // (base: https://web.dev/fetch-upload-streaming/#feature-detection)
+      const supportsRequestStreams = !new Request('', {
+        body: new ReadableStream(),
+        method: 'POST',
+      }).headers.has('Content-Type');
+
+      // If not support fetch() upload streaming
+      if (!supportsRequestStreams) {
+        // Hide login card
+        document.getElementById('login_cred').style.display = "none";
+        // Show message
+        document.getElementById('not_supported_message').style.display = null;
+        return;
+      }
+
       document.getElementById('login_cred').style.display = "block";
+
+      const pathLen = 3;
+      document.getElementById('path1').value = randomString(pathLen);
+      document.getElementById('path2').value = randomString(pathLen);
+      setCommandHint();
+
       // Sets the default colorScheme to material
       settings = new SSHyClient.settings();
       settings.setColorScheme(1);
 
       // Apply fit addon
       fit.apply(Terminal)
-
-      // Build the default wsProxy URL for display on sidenav
-      buildWSProxyURL()
 
       // Connect upon hitting Enter from the password field
       document.getElementById("password").addEventListener("keyup", function (event) {
@@ -72,41 +92,6 @@
       }
     }
 
-    // Build the entire websocket url eg (wss://localhost:5999/) based on http protocol
-    function buildWSProxyURL(portPassed) {
-      // Decide if we're using secure ws or not
-      if (window.location.protocol == "https:") {
-        wsproxyProto = "wss"
-      }
-
-      var port
-      if (portPassed) {
-        port = ""
-      } else {
-        port = ':' + wsproxyPorts[wsproxyProto]
-      }
-
-      // Build the wsproxyURL up
-      wsproxyURL = wsproxyProto + '://' + wsproxyURL + port + '/'
-
-      document.getElementById("websockURL").value = wsproxyURL
-    }
-
-    // Changes the websocket proxy URL ** BEFORE ** connection ONLY
-    function modProxyURL(newURL) {
-      if (!ws) {
-        // Strip it down to barebones URL:PORT(optional)
-        matches = /^w?s{0,2}:?\/{0,2}(([a-z0-9]+\.)*[a-z0-9]+\.?[a-z]+)\:?([0-9]{1,5})?/g.exec(newURL)
-        var port = ""
-        if (newURL.match(":")) {
-          port = ":" + matches[matches.length - 1]
-        }
-
-        wsproxyURL = matches[1] + port;
-        buildWSProxyURL(port)
-      }
-    }
-
     // Toggles the settings navigator
     function toggleNav(size) {
       document.getElementById("settingsNav").style.width = size + 'px';
@@ -120,46 +105,9 @@
       element.visibility = element.visibility === "hidden" ? "visible" : "hidden";
     }
 
-    // Rudimentary checks that an IP address is external and is a valid hostname or IP address
     function validate(id, text) {
       if (!text) {
         document.getElementById(id).style.borderBottom = 'solid 2px #ff4d4d'
-      } else {
-        if (id == "ipaddress") {
-          // incase we have a error for the port
-          if (text.includes(':')) {
-            if (!validate_port(text.split(':')[1])) {
-              document.getElementById(id).style.borderBottom = 'solid 2px #ff4d4d'
-              return
-            } else {
-              document.getElementById(id).style.borderBottom = 'solid 2px #c9c9c9'
-              document.getElementById('failure').style.display = "none"
-            }
-          } else {
-            // if we're not doing ports then hide the failure message
-            document.getElementById('failure').style.display = "none"
-          }
-          // test for valid domain name
-          if (!/^([a-z0-9]+\.)*[a-z0-9]+\.[a-z]+(\:[0-9]{1,5})?$/.test(text)) {
-            if (check_internal(text)) {
-              display_error("Be aware - IP addresses are resolved at the websocket proxy")
-            }
-            // test ip aswell.
-            if (!/^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$|(\:[0-9]{1,5}))){4}$/.test(text)) {
-              document.getElementById(id).style.borderBottom = 'solid 2px #ff4d4d'
-              return
-            } else {
-              if (check_internal(text)) {
-                display_error("Could no resolve hostname: Please use an external address")
-              }
-              document.getElementById(id).style.borderBottom = 'solid 2px #c9c9c9'
-              return
-            }
-            document.getElementById(id).style.borderBottom = 'solid 2px #ff4d4d'
-            return
-          }
-        }
-        document.getElementById(id).style.borderBottom = 'solid 2px #c9c9c9'
       }
     }
 
@@ -169,19 +117,7 @@
         return port_num
       } else {
         display_error("Invalid port: port must be between 1 - 65535")
-        validate('ipaddress', '')
       }
-    }
-
-    // checks for 10.*.*.*, 192.168.*.*, 172.16.*.*, 127.0.0.1 & loocalhost
-    function check_internal(ip_address) {
-      if (/10\.\d+\.\d+\.\d+/.test(ip_address) || /192\.168\.\d+\.\d+/.test(ip_address) || /172\.16\.\d+\.\d+/.test(ip_address)) {
-        return true
-      } else if (ip_address == '127.0.0.1' || ip_address == 'localhost') {
-        return true
-      }
-
-      return false
     }
 
     // Displays a given err on the page
@@ -194,20 +130,45 @@
       document.getElementById('failure').style.display = "block"
     }
 
+    function setCommandHint() {
+      const hintTextarea = document.getElementById('server_host_command_hint');
+      const pipingServerUrl = document.getElementById('piping_server').value;
+      const path1 = document.getElementById('path1').value;
+      const path2 = document.getElementById('path2').value;
+
+      if (path1 === '' || path2 === '') return;
+
+      const escapedPipingServerUrl = pipingServerUrl.replace(/:/g, '\\:').replace(/\/$/, '') ;
+
+      const socatCommand = `socat 'EXEC:curl -NsS ${escapedPipingServerUrl}/${path1}!!EXEC:curl -NsST - ${escapedPipingServerUrl}/${path2}' TCP:127.0.0.1:22`
+
+      hintTextarea.value = socatCommand;
+    }
+
+    function stringToUint8Array(str) {
+      const numbers= [].map.call(str, (c) => {
+        return c.charCodeAt(0);
+      });
+      return new Uint8Array(numbers);
+    }
+
+    // (base: https://stackoverflow.com/a/12713326/2885946)
+    function uint8ArrayToString(uint8Arr) {
+      const CHUNK_SZ = 0x8000;
+      const c = [];
+      for (let i = 0; i < uint8Arr.length; i+=CHUNK_SZ) {
+        c.push(String.fromCharCode.apply(null, uint8Arr.subarray(i, i + CHUNK_SZ)));
+      }
+      return c.join("");
+    }
+
     // Starts the SSH client in scripts/transport.js
     function startSSHy() {
-      var html_ipaddress = document.getElementById('ipaddress').value
       var termUsername = document.getElementById('username').value
       var termPassword = document.getElementById('password').value
-
-      // find the port number
-      if (html_ipaddress.includes(':')) {
-        var split = html_ipaddress.split(':')
-        html_ipaddress = split[0]
-        html_port = validate_port(split[1])
-      } else {
-        html_port = 22
-      }
+      const pipingServerUrl = document.getElementById('piping_server').value.replace(/\/$/, '');
+      const path1 = document.getElementById('path1').value;
+      const path2 = document.getElementById('path2').value;
 
       if (termUsername.length == 0 || termPassword.length == 0) {
         validate('username', termUsername)
@@ -220,58 +181,42 @@
       document.getElementById('connect').value = 'Connecting...'
       document.getElementById('load-container').style.display = "block"
 
-      // Disable websocket proxy modifications
-      document.getElementById('websockURL').disabled = true
-
       // Initialise the window title
       document.title = "SSHy Client";
-      // Opens the websocket!
-      wsproxyURL += html_ipaddress + ':' + html_port
-      ws = new WebSocket(wsproxyURL, 'base64');
 
-      // Sets up websocket listeners
-      ws.onopen = function (e) {
-        transport = new SSHyClient.Transport(ws, settings);
+      let controller = null;
+      const readable = new ReadableStream({
+        start(ctrl) {
+          controller = ctrl;
+        }
+      });
+
+      function sendBinaryString(binaryString) {
+        controller.enqueue(stringToUint8Array(binaryString));
+        transport.parceler.transmitData += binaryString.length;
+        settings.setNetTraffic(transport.parceler.transmitData, false);
+      }
+
+      (async () => {
+        fetch(`${pipingServerUrl}/${path1}`, {
+          method: "POST",
+          body: readable,
+          allowHTTP1ForStreamingUpload: true,
+        });
+
+        transport = new SSHyClient.Transport(settings, sendBinaryString);
         transport.auth.termUsername = termUsername;
         transport.auth.termPassword = termPassword;
-        transport.auth.hostname = html_ipaddress;
-      };
-      // Send all recieved messages to SSHyClient.Transport.handle()
-      ws.onmessage = function (e) {
-        // Convert the recieved data from base64 to a string
-        transport.parceler.handle(atob(e.data));
-      };
-      // Whenever the websocket is closed make sure to display an error if appropriate
-      ws.onclose = function (e) {
-        // Set the sidenav websocket proxy color to yellow
-        document.getElementById('websockURL').classList.remove('brightgreen')
-        document.getElementById('websockURL').classList.add('brightyellow')
-        if (term) {
-          // Don't display an error if SSH transport has already detected a graceful exit
-          if (transport.closing) {
-            return;
-          }
-          term.write('\n\n\rWebsocket connection to ' + transport.auth.hostname + ' was unexpectedly closed.');
-          // If there is no keepAliveInterval then inform users they can use it
-          if (!settings.keepAliveInterval) {
-            term.write('\n\n\rThis was likely caused by he remote SSH server timing out the session due to inactivity.\r\n- Session Keep Alive interval can be set in the settings to prevent this behaviour.');
-          }
-        } else {
-          // Since no terminal exists we need to initialse one before being able to write the error
-          termInit();
-          term.write('WebSocket connection failed: Error in connection establishment: code ' + e.code);
+
+        const res = await fetch(`${pipingServerUrl}/${path2}`);
+        const reader = res.body.getReader();
+        while(true) {
+          const {value, done} = await reader.read();
+          if (done) break;
+          const str = uint8ArrayToString(value);
+          transport.parceler.handle(str);
         }
-      };
-      // Just a little abstraction from ws.send
-      ws.sendB64 = function (e) {
-        this.send(btoa(e));
-
-        transport.parceler.transmitData += e.length;
-        settings.setNetTraffic(transport.parceler.transmitData, false);
-      };
-
-      // Set the sidenav websocket proxy color to green
-      document.getElementById('websockURL').classList.add('brightgreen')
+      })();
     }
 
     // Initialises xtermjs
@@ -308,7 +253,7 @@
       // sets up some listeners for the terminal (keydown, paste)
       term.textarea.onkeydown = function (e) {
         // Sanity Checks
-        if (!ws || !transport || transport.auth.failedAttempts >= 5 || transport.auth.awaitingAuthentication) {
+        if (!transport || transport.auth.failedAttempts >= 5 || transport.auth.awaitingAuthentication) {
           return;
         }
 
@@ -433,42 +378,57 @@
     <span class="title" style="padding-top:20px;">Host Key</span>
     <span id="hostKeyImg" class="hostKeyImg"></span>
   </div>
-  <span class="footer">
-			<span class="title">Websocket Proxy</span>
-			<div class="fileUpload btn btn-primary">
-				<span class="tooltiptext">Websocket Proxy URL</span>
-				<input type="text" class="large" id="websockURL" onchange="modProxyURL(this.value)">
-			</div>
-		</span>
 </div>
 <span id="gear" class="gear" style="visibility:visible;" onclick="toggleNav(250)">&#9881</span>
 
+<pre id="not_supported_message" style="display: none; text-align: center; color: white; margin-bottom: 2em;">
+  ⚠️ This browser does not supported.
+  Use Google Chrome 85 or above and enable new feature by:
+  "chrome://flags/ > Experimental Web Platform features > Enabled"
+</pre>
 <div id="login_cred" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2><span class="icon-lock"></span> SSHv2 Login</h2>
+      <h2><span class="icon-lock"></span> Piping SSH</h2>
     </div>
     <div class="modal-body">
       <table style="width: 100%">
         <tr>
-          <td><span class="icon-address-book"></span> IP Address:</td>
-          <td><input type="text" id="ipaddress" placeholder="sshy.us(:22)" style="width: 90%"
-                     onblur="validate(this.id, this.value)" autofocus></td>
+          <td><span class=""></span> Piping Server:</td>
+          <td><input type="text" id="piping_server" oninput="setCommandHint()" value="https://ppng.io" style="width: 90%"
+                     autofocus></td>
         </tr>
         <tr>
-          <td><span class="icon-user-circle-o"></span> Username:</td>
+          <td><span class=""></span> Path1:</td>
+          <td><input type="text" id="path1" oninput="setCommandHint()" placeholder="aaa" style="width: 90%"></td>
+        </tr>
+        <tr>
+          <td><span class=""></span> Path2:</td>
+          <td><input type="text" id="path2" oninput="setCommandHint()" placeholder="bbb" style="width: 90%"></td>
+        </tr>
+        <tr>
+          <td><span class=""></span> Username:</td>
           <td><input type="text" id="username" placeholder="username" style="width: 90%"
                      onblur="validate(this.id, this.value)"></td>
         </tr>
         <tr>
-          <td><span class="icon-eye"></span> Password:</td>
+          <td><span class=""></span> Password:</td>
           <td><input type="password" id="password" style="width: 90%" onblur="validate(this.id, this.value)"></td>
         </tr>
       </table>
       <i id="failure" class="failure"></i>
       <input type="button" id="connect" class="button" value="Connect" onclick="startSSHy()">
+      <hr>
+      <div>Command hint</div>
+      <textarea id="server_host_command_hint" style="width: 100%" placeholder="..."></textarea>
     </div>
   </div>
+  <p style="text-align: center">
+    <a href="https://github.com/nwtgck/piping-ssh-web" target="_blank" style="color: white">
+      <svg style="width: 1em;" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="github" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path fill="currentColor" d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z" class=""></path>
+      </svg> View source code on GitHub
+    </a>
+  </p>
   <div id="load-container" class="load-container">
     <svg id="load" x="0px" y="0px" viewBox="0 0 150 150">
       <circle id="loading-inner" cx="75" cy="75" r="60"></circle>

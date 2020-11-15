@@ -2,7 +2,6 @@ SSHyClient.auth = function (parceler) {
   this.parceler = parceler; // We shouldn't need anything from the transport handler
   this.authenticated = null;
   this.awaitingAuthentication = false;
-  this.hostname = wsproxyURL ? wsproxyURL.split('/')[2].split(':')[0] : '';
   this.termUsername = '';
   this.termPassword = undefined;
   this.failedAttempts = 0;
@@ -43,7 +42,7 @@ SSHyClient.auth.prototype = {
   auth_success: function (success) {
     if (success) {
       // Change the window title
-      document.title = this.termUsername + '@' + this.hostname;
+      document.title = this.termUsername;
       // Purge the username and password
       this.termUsername = '';
       this.termPassword = undefined;
@@ -51,9 +50,10 @@ SSHyClient.auth.prototype = {
       if (!term) {
         startxtermjs();
       }
-      // Starts up the keep alive interval to 240s
-      transport.settings.setKeepAlive(240);
-      document.getElementById('keepAlive').value = 240;
+      // Starts up the keep alive interval to 30s
+      // NOTE: Chrome quits a HTTP request when received no bytes in 60s
+      transport.settings.setKeepAlive(30);
+      document.getElementById('keepAlive').value = 30;
       // We've been authenticated, lets open a channel
       this.open_channel('session');
     }
@@ -131,7 +131,7 @@ SSHyClient.auth.prototype = {
         transport.disconnect();
         return;
       }
-      term.write(this.termUsername + '@' + this.hostname + '\'s password:');
+      term.write(this.termUsername + '\'s password:');
       this.termPassword = '';
     } else {
       display_error('Invalid Username or Password');

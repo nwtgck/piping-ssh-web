@@ -1,4 +1,4 @@
-SSHyClient.Transport = function (ws, settings) {
+SSHyClient.Transport = function (settings, sendBinaryString) {
   this.local_version = 'SSH-2.0-SSHyClient';
   this.remote_version = '';
 
@@ -21,7 +21,7 @@ SSHyClient.Transport = function (ws, settings) {
   this.preferred_hash = null;
 
   // Other SSHyClient module classes
-  this.parceler = new SSHyClient.parceler(ws, this);
+  this.parceler = new SSHyClient.parceler(this, sendBinaryString);
   this.auth = new SSHyClient.auth(this.parceler);
   this.settings = settings === undefined ? new SSHyClient.settings() : settings;
 
@@ -77,7 +77,7 @@ SSHyClient.Transport.prototype = {
     /* Sends our local SSH version to the SSH server */
     0: function (self, m) {
       // Directly interface with the websocket
-      self.parceler.socket.sendB64(self.local_version + '\r\n');
+      self.parceler.sendBinaryString(self.local_version + '\r\n');
       // Slice off the '/r/n' from the end of our remote version
       self.remote_version = m.slice(0, m.length - 2);
       self.send_kex_init();
@@ -223,15 +223,10 @@ SSHyClient.Transport.prototype = {
     m.add_bytes(String.fromCharCode(SSHyClient.MSG_DISCONNECT));
     m.add_int(reason);
     this.send_packet(m.toString());
-    ws.close();
-    term.write("\r\nConnection to " + this.auth.hostname + " closed. Code - " + reason);
+    term.write("\r\nConnection to SSH server closed. Code - " + reason);
   },
   // Sends a null packet to the SSH server to keep the connection alive
   keepAlive: function () {
-    // Make sure the websocket is still open
-    if (ws.readyState === 3) {
-      return;
-    }
     var m = new SSHyClient.Message();
     m.add_bytes(String.fromCharCode(SSHyClient.MSG_IGNORE));
     m.add_string('');
