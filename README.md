@@ -42,6 +42,9 @@ hmac
 
 Both SHA1 and SHA256 are supported for diffie-hellman and HMAC algorithms.
 
+## URL fragment parameters
+
+e.g. <https://piping-ssh.netlify.app/#?user=myuser&password=mypass&s_port=22&cs_path=aaa&sc_path=bbb>
 
 ## Build
 
