@@ -43,6 +43,11 @@
       return Array.from(randomArr).map(n => nonConfusingChars[n % nonConfusingChars.length]).join('');
     }
 
+    function parseHashAsQuery() {
+      const url = new URL(`a://a${location.hash.substring(1)}`);
+      return url.searchParams;
+    }
+
     window.onload = function () {
       // (base: https://web.dev/fetch-upload-streaming/#feature-detection)
       const supportsRequestStreams = !new Request('', {
@@ -61,9 +66,12 @@
 
       document.getElementById('login_cred').style.display = "block";
 
+      document.getElementById('username').value = parseHashAsQuery().get("user") ?? "";
+      document.getElementById('password').value = parseHashAsQuery().get("password") ?? "";
+
       const pathLen = 3;
-      document.getElementById('path1').value = randomString(pathLen);
-      document.getElementById('path2').value = randomString(pathLen);
+      document.getElementById('path1').value = parseHashAsQuery().get("cs_path") ?? randomString(pathLen);
+      document.getElementById('path2').value = parseHashAsQuery().get("sc_path") ?? randomString(pathLen);
       setCommandHint();
 
       // Sets the default colorScheme to material
@@ -133,6 +141,7 @@
     }
 
     function setCommandHint() {
+      const port = parseHashAsQuery().get("s_port") ?? "22";
       const hintTextarea = document.getElementById('server_host_command_hint');
       const pipingServerUrl = document.getElementById('piping_server').value;
       const path1 = document.getElementById('path1').value;
@@ -142,7 +151,7 @@
 
       const escapedPipingServerUrl = pipingServerUrl.replace(/:/g, '\\:').replace(/\/$/, '') ;
 
-      const socatCommand = `socat 'EXEC:curl -NsS ${escapedPipingServerUrl}/${path1}!!EXEC:curl -NsST - ${escapedPipingServerUrl}/${path2}' TCP:127.0.0.1:22`
+      const socatCommand = `socat 'EXEC:curl -NsS ${escapedPipingServerUrl}/${path1}!!EXEC:curl -NsST - ${escapedPipingServerUrl}/${path2}' TCP:127.0.0.1:${port}`;
 
       hintTextarea.value = socatCommand;
     }
