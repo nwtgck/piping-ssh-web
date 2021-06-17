@@ -253,7 +253,8 @@
       termInit();
 
       // sets up some listeners for the terminal (keydown, paste)
-      term.textarea.onkeydown = function (e) {
+      // FIXME: use "keydown" but "Enter" not fired in "keydown"
+      term.textarea.addEventListener('keyup', function (e) {
         // Sanity Checks
         if (!transport || transport.auth.failedAttempts >= 5 || transport.auth.awaitingAuthentication) {
           return;
@@ -299,7 +300,7 @@
            Instead we're checking the our locally echoed key and replacing it if the
            recieved key !== locally echoed key */
         return command === null ? null : transport.expect_key(command);
-      };
+      });
 
       term.textarea.onpaste = function (ev) {
         var text
