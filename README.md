@@ -25,7 +25,7 @@ The base project, [SSHy], is a fast and responsive SSHv2 web client with end-to-
 * UTF-8 Character support
 * Automatic local echo detection
 * Customisable terminal & font size
-* Copy and Paste support for Chrome & Firefox
+* Copy and Paste support
 * Network Traffic Monitor
 
 ## Compatibility powered by [SSHy]
