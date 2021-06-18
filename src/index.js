@@ -10,6 +10,7 @@ import "./settings";
 import "./transport";
 import {splitSlice} from "./lib/utilities";
 import {Terminal} from "xterm";
+import {FitAddon} from 'xterm-addon-fit';
 
 (() => {
     function randomString(len){
@@ -53,9 +54,6 @@ import {Terminal} from "xterm";
         settings = new SSHyClient.settings();
         settings.setColorScheme(1);
 
-        // // Apply fit addon
-        // fit.apply(Terminal)
-
         // Connect upon hitting Enter from the password field
         document.getElementById("password").addEventListener("keyup", function (event) {
             if (event.key !== "Enter") return;
@@ -66,14 +64,15 @@ import {Terminal} from "xterm";
 
     // Run every time the webpage is resized
     window.onresize = function () {
-        clearTimeout(resizeInterval);
-        resizeInterval = setTimeout(resize, 400);
-    }
+        resize()
+    };
+
+    const fitAddon = new FitAddon();
 
     // Recalculates the terminal Columns / Rows and sends new size to SSH server + xtermjs
     window.resize = function () {
         if (term) {
-            // term.fit()
+            fitAddon.fit();
         }
     }
 
@@ -208,14 +207,12 @@ import {Terminal} from "xterm";
     // Initialises xtermjs
     function termInit() {
         // Define the terminal rows/cols
-        term = new Terminal({
-            cols: 80,
-            rows: 24
-        });
+        term = new Terminal();
+        term.loadAddon(fitAddon);
 
         // start xterm.js
         term.open(document.getElementById('terminal'), true);
-        // term.fit()
+        fitAddon.fit();
         term.focus()
 
         // set the color scheme to whatever the user's changed it to in the mean time
@@ -236,54 +233,8 @@ import {Terminal} from "xterm";
     window.startxtermjs = function () {
         termInit();
 
-        // sets up some listeners for the terminal (keydown, paste)
-        // FIXME: use "keydown" but "Enter" not fired in "keydown"
-        term.textarea.addEventListener('keyup', function (e) {
-            // Sanity Checks
-            if (!transport || transport.auth.failedAttempts >= 5 || transport.auth.awaitingAuthentication) {
-                return;
-            }
-
-            // So we don't spam single control characters
-            if (e.key.length > 1 && (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) && e.key != "Backspace") {
-                return;
-            }
-
-            // We've already authenticated so now any keypress is a command for the SSH server
-            var command, pressedKey;
-
-            /** IE isn't very good so it displays one character keys as full names in .key
-             EG - e.key = " " to e.key = "Spacebar"
-             so assuming .char is one character we'll use that instead **/
-            if (e.char && e.char.length == 1) {
-                pressedKey = e.char;
-            } else {
-                pressedKey = e.key
-            }
-
-            // Decides if the keypress is an alphanumeric character or needs escaping
-            if (pressedKey.length == 1 && (!(e.altKey || e.ctrlKey || e.metaKey) || (e.altKey && e.ctrlKey))) {
-                command = pressedKey;
-            } else if (pressedKey.length == 1 && (e.shiftKey && e.ctrlKey)) {
-                // allows ctrl + shift + v for pasting
-                if (pressedKey != 'V') {
-                    e.preventDefault();
-                    return;
-                }
-            } else {
-                //xtermjs is kind enough to evaluate our special characters instead of having to translate every char ourself
-                command = term._evaluateKeyEscapeSequence(e).key;
-            }
-
-            // Decide if we're going to locally' echo this key or not
-            if (settings.localEcho) {
-                settings.parseKey(e);
-            }
-            /* Regardless of local echo we still want a reply to confirm / update terminal
-               could be controversial? but putty does this too (each key press shows up twice)
-               Instead we're checking the our locally echoed key and replacing it if the
-               recieved key !== locally echoed key */
-            return command === null ? null : transport.expect_key(command);
+        term.onData((data) => {
+            transport.expect_key(data);
         });
 
         term.textarea.onpaste = function (ev) {

@@ -302,7 +302,7 @@ SSHyClient.settings.prototype = {
 
     // Interact with xtermjs
     if (term) {
-      term._setTheme(themeColors)
+      // term._setTheme(themeColors)
     }
 
     // Remove the old CSS rules if its a custom theme
