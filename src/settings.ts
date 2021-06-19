@@ -1,40 +1,9 @@
 import {SSHyClient} from "./defines";
 import {modColorPercent} from "./lib/utilities";
 
-export const SshClientSettings = function () {
-  // Local echo reduces latency on regular key presses to aruond 0.04s compared to ~0.2s without it
-  this.localEcho = 0; // 0 - off; 1 - auto; 2 - on
-
-  /* Default the bindings to bash */
-  this.fsHintEnter = "\x1b\x5b\x3f\x31"; // seems to be the same for all shells
-  this.fsHintLeave = SSHyClient.bashFsHintLeave;
-
-  this.autoEchoState = false; // false = no echoing ; true = echoing
-  this.autoEchoTimeout = 0; // stores the time of last autoecho change
-
-  this.blockedKeys = [':']; // while localecho(force-on) don't echo these keys
-
-  this.keepAliveInterval = undefined; // stores the setInterval() reference
-
-  this.fontSize = 16;
-
-  this.colorTango = true
-  this.colorNames = Object.keys(this.colorSchemes);
-  this.colorCounter = 0; // Stores the current index of the theme loaded in colorSchemes
-
-  this.shellString = ''; // Used to buffer shell identifications ie ']0;fish' or 'user@host$'
-
-  this.sidenavElementState = 0; // Stores the state of the sidenav (0 - closed, [x] - true)
-  // Caches the DOM elements
-  this.rxElement = document.getElementById('rxTraffic');
-  this.txElement = document.getElementById('txTraffic');
-  this.autoEchoElement = document.getElementById('autoEchoState');
-
-  this.rsaCheckEnabled = true;
-};
-SshClientSettings.prototype = {
+export class SshClientSettings {
   // All our supported terminal color themes in [bg, color1, .... , color15, cursor, fg]
-  colorSchemes: [
+  colorSchemes = [
     ['Solarized', {
       background: "#002b36",
       black: "#002b36",
@@ -183,10 +152,41 @@ SshClientSettings.prototype = {
       foreground: "#ffffff"
     }],
     ['Tango', {}]
-  ],
+  ];
+
+  // Local echo reduces latency on regular key presses to aruond 0.04s compared to ~0.2s without it
+  localEcho = 0; // 0 - off; 1 - auto; 2 - on
+
+  /* Default the bindings to bash */
+  fsHintEnter = "\x1b\x5b\x3f\x31"; // seems to be the same for all shells
+  fsHintLeave = SSHyClient.bashFsHintLeave;
+
+  autoEchoState = false; // false = no echoing ; true = echoing
+  autoEchoTimeout = 0; // stores the time of last autoecho change
+
+  blockedKeys = [':']; // while localecho(force-on) don't echo these keys
+
+  keepAliveInterval: any = undefined; // stores the setInterval() reference
+
+  fontSize = 16;
+
+  colorTango = true
+  colorNames = Object.keys(this.colorSchemes);
+  colorCounter = 0; // Stores the current index of the theme loaded in colorSchemes
+
+  shellString = ''; // Used to buffer shell identifications ie ']0;fish' or 'user@host$'
+
+  sidenavElementState = 0; // Stores the state of the sidenav (0 - closed, [x] - true)
+  // Caches the DOM elements
+  rxElement = document.getElementById('rxTraffic')!;
+  txElement = document.getElementById('txTraffic')!;
+  autoEchoElement = document.getElementById('autoEchoState')!;
+
+  rsaCheckEnabled = true;
+
 
   // Takes a single character and identifies shell type
-  testShell: function (r) {
+  testShell(r: string) {
     // Check that we're adding the start of a string
     if (r.substring(0, 2).indexOf(']') === -1 && (this.shellString.length === 0 || this.shellString.length > ']0;fish'.length)) {
       this.shellString = '';
@@ -212,27 +212,28 @@ SshClientSettings.prototype = {
       this.fsHintLeave = SSHyClient.bashFsHintLeave;
       return;
     }
-  },
+  }
+
   // Toggles Local Echo on and off
-  setLocalEcho: function (dir) {
+  setLocalEcho(dir: number) {
     // Clamp the setting between 0 and 2
     this.localEcho = Math.min(Math.max(this.localEcho += dir, 0), 2);
 
     // Change the displayed mode to the string at 'this.localEcho' of array
-    document.getElementById('currentLEcho').innerHTML = ["Force Off", "Auto", "Force On"][this.localEcho];
+    document.getElementById('currentLEcho')!.innerHTML = ["Force Off", "Auto", "Force On"][this.localEcho];
 
     // If we're using auto echo mode, change the auto state tooltiptext
-    var element = document.getElementById('autoEchoState');
+    var element = document.getElementById('autoEchoState')!;
     if (this.localEcho === 1) {
       element.style.visibility = 'visible';
       element.innerHTML = "State: " + (this.autoEchoState === false ? 'Disabled' : 'Enabled');
     } else {
       element.style.visibility = 'hidden';
     }
-  },
+  }
 
   // Parses a given message (r) for signs to enable or disable local echo
-  parseLocalEcho: function (r) {
+  parseLocalEcho(r: string) {
     // if we're using auto mode
     if (this.localEcho === 1) {
       // Caching this since it takes a long time to get at least twice
@@ -261,9 +262,10 @@ SshClientSettings.prototype = {
       }
     }
     return;
-  },
+  }
+
   // Parses a keydown event to determine if we can safely echo the key.
-  parseKey: function (e) {
+  parseKey(e: any) {
     // Don't continue to write the key if auto echoing is disabled
     if (this.localEcho === 1 && this.autoEchoState === false) {
       return;
@@ -273,13 +275,14 @@ SshClientSettings.prototype = {
       return;
     }
     // Incase someone is typing very fast don't echo to perserve servers formatting.
-    if (!transport.lastKey) {
-      term.write(e.key);
+    if (!(window as any).transport.lastKey) {
+      (window as any).term.write(e.key);
     }
-    transport.lastKey += e.key;
-  },
+    (window as any).transport.lastKey += e.key;
+  }
+
   // Sets the keep alive iterval or clears a current interval based on 'time'
-  setKeepAlive: function (time) {
+  setKeepAlive(time: any) {
     // changes 'time' into seconds & floors time to stop 0.00001s ect
     time = time === undefined ? 0 : Math.floor(time) * 1000;
     // if there is an interval setup then clear it
@@ -291,17 +294,18 @@ SshClientSettings.prototype = {
       }
     }
     // otherwise create a new interval
-    this.keepAliveInterval = setInterval(transport.keepAlive, time);
-  },
+    this.keepAliveInterval = setInterval((window as any).transport.keepAlive, time);
+  }
+
   // Set xtermjs's color scheme to the given color
-  setColorScheme: function (colIndex) {
+  setColorScheme(colIndex: any) {
     // Gets a reference to xterm.css
     var term_style = document.styleSheets[0];
     var themeName = this.colorSchemes[colIndex][0]
-    var themeColors = this.colorSchemes[colIndex][1]
+    var themeColors: any = this.colorSchemes[colIndex][1]
 
     // Interact with xtermjs
-    if (term) {
+    if ((window as any).term) {
       // term._setTheme(themeColors)
     }
 
@@ -314,7 +318,7 @@ SshClientSettings.prototype = {
 
     if (themeName === 'Tango') {
       this.colorTango = true;
-      document.getElementById('currentColor').innerHTML = 'Tango';
+      document.getElementById('currentColor')!.innerHTML = 'Tango';
       return;
     }
 
@@ -328,15 +332,15 @@ SshClientSettings.prototype = {
 
     this.colorTango = false;
 
-    document.getElementById('currentColor').innerHTML = themeName === undefined ? 'Custom' : themeName;
-  },
+    document.getElementById('currentColor')!.innerHTML = themeName === undefined ? 'Custom' : themeName as any;
+  }
 
-  importXresources: function () {
+  importXresources() {
     var reader = new FileReader();
-    var element = document.getElementById('Xresources').files[0];
+    var element = (document.getElementById('Xresources') as HTMLInputElement).files![0];
     reader.readAsText(element);
     reader.onload = function () {
-      var file = reader.result;
+      var file = reader.result as string;
       var lines = file.split("\n");
       // natural sort the Xresources list to bg, 1 - 15, cur, fg colours
       lines = lines.sort(new Intl.Collator(undefined, {
@@ -344,7 +348,7 @@ SshClientSettings.prototype = {
         sensitivity: 'base'
       }).compare);
 
-      var colScheme = [];
+      var colScheme: any = [];
 
       for (var i = 0; i < lines.length; i++) {
         // Regex the line for a color code #xxx or #xxxxxx
@@ -385,17 +389,18 @@ SshClientSettings.prototype = {
         cursor: colScheme[17],
         foreground: colScheme[18]
       }
-      var colName = element.name === '.Xresources' ? 'custom' : element.name.split('.')[0]
+      var colName = element.name === '.Xresources' ? 'custom' : element.name.split('.')[0] as any;
 
       // Add to the colorSchemes list
-      transport.settings.colorSchemes.push([colName, colScheme])
+      (window as any).transport.settings.colorSchemes.push([colName, colScheme])
       // Get the new key
-      transport.settings.colorNames = Object.keys(transport.settings.colorSchemes);
-      transport.settings.setColorScheme(transport.settings.colorSchemes.length - 1)
+      (window as any).transport.settings.colorNames = Object.keys((window as any).transport.settings.colorSchemes);
+      (window as any).transport.settings.setColorScheme((window as any).transport.settings.colorSchemes.length - 1)
     };
-  },
+  }
+
   // Cycle the color counter and set the current colors to new index
-  cycleColorSchemes: function (dir) {
+  cycleColorSchemes(dir: number) {
     // Cycles through (0 -> colorSchemes.length - 1) where dir = 1 is incrementing and dir = false decrements
     this.colorCounter = dir === 0 ? --this.colorCounter : ++this.colorCounter;
     if (this.colorCounter > this.colorNames.length - 1 || this.colorCounter < 0) {
@@ -403,29 +408,32 @@ SshClientSettings.prototype = {
     }
     // Set color scheme to (colorList [ colorNames [ counter ]])
     this.setColorScheme(this.colorCounter)
-  },
-  // Modify the font size of the terminal
-  modFontSize: function (sign) {
-    this.fontSize += sign;
-    term.setOption('fontSize', this.fontSize)
+  }
 
-    document.getElementById("currentFontSize").innerHTML = transport.settings.fontSize + 'px';
+  // Modify the font size of the terminal
+  modFontSize(sign: number) {
+    this.fontSize += sign;
+    (window as any).term.setOption('fontSize', this.fontSize)
+
+    document.getElementById("currentFontSize")!.innerHTML = (window as any).transport.settings.fontSize + 'px';
     // Recalculate rows/cols
-    term.fit()
-    transport.auth.mod_pty('window-change', term.cols, term.rows);
-  },
+    (window as any).term.fit()
+    (window as any).transport.auth.mod_pty('window-change', (window as any).term.cols, (window as any).term.rows);
+  }
+
   // Sets the terminal size where id= 0-> cols ; 1-> rows
-  modTerm: function (id, newAmount) {
+  modTerm(id: any, newAmount: any) {
     if (!id) {
-      term.resize(newAmount, term.rows);
+      (window as any).term.resize(newAmount, (window as any).term.rows);
     } else {
-      term.resize(term.cols, newAmount);
+      (window as any).term.resize((window as any).term.cols, newAmount);
     }
 
-    transport.auth.mod_pty('window-change', term.cols, term.rows);
-  },
+    (window as any).transport.auth.mod_pty('window-change', (window as any).term.cols, (window as any).term.rows);
+  }
+
   // Changes the network traffic setting to reflect transmitted or recieved data
-  setNetTraffic: function (value, dir) {
+  setNetTraffic(value: any, dir: boolean) {
     // No point recalculating if the sidenav is closed
     if (!this.sidenavElementState) {
       return;
@@ -447,6 +455,6 @@ SshClientSettings.prototype = {
     }
     // Set the target element we we're going to change.
     var element = dir === true ? this.rxElement : this.txElement;
-    element.innerHTML = value;
+    element!.innerHTML = value;
   }
-};
+}
