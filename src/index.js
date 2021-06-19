@@ -236,33 +236,5 @@ import {FitAddon} from 'xterm-addon-fit';
         term.onData((data) => {
             transport.expect_key(data);
         });
-
-        term.textarea.onpaste = function (ev) {
-            var text
-
-            // Yay IE11 stuff!
-            if (window.clipboardData && window.clipboardData.getData) {
-                text = window.clipboardData.getData('Text')
-            } else if (ev.clipboardData && ev.clipboardData.getData) {
-                text = ev.clipboardData.getData('text/plain');
-            }
-
-            if (text) {
-                // Just don't allow more than 1 million characters to be pasted.
-                if (text.length < 1000000) {
-                    if (text.length > 5000) {
-                        // If its a long string then chunk it down to reduce load on SSHyClient.parceler
-                        text = splitSlice(text);
-                        for (var i = 0; i < text.length; i++) {
-                            transport.expect_key(text[i]);
-                        }
-                        return;
-                    }
-                    transport.expect_key(text);
-                } else {
-                    alert('Error: Pasting large strings is not permitted.');
-                }
-            }
-        };
     }
 })();
