@@ -1,6 +1,6 @@
 import {SSHyClient} from "./defines";
 
-SSHyClient.auth = function (parceler) {
+export const SshClientAuth = function (parceler) {
   this.parceler = parceler; // We shouldn't need anything from the transport handler
   this.authenticated = null;
   this.awaitingAuthentication = false;
@@ -10,7 +10,7 @@ SSHyClient.auth = function (parceler) {
   this.channelOpened = false;
 };
 
-SSHyClient.auth.prototype = {
+SshClientAuth.prototype = {
   // Requests we want to authenticate ourselves with the SSH server
   request_auth: function () {
     var m = new SSHyClient.Message();
