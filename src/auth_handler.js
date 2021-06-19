@@ -1,5 +1,4 @@
 import {SSHyClient} from "./defines";
-import "./message";
 
 SSHyClient.auth = function (parceler) {
   this.parceler = parceler; // We shouldn't need anything from the transport handler
