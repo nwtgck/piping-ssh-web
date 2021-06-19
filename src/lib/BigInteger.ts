@@ -1,7 +1,12 @@
+// @ts-nocheck
+
 export class BigInteger {
-    constructor(a, b, c) {
+    constructor(a?: string | number, b?: number, c?: any) {
         null != a && ("number" == typeof a ? this.fromNumber(a, b, c) : null == b && "string" != typeof a ? this.fromString(a, 256) : this.fromString(a, b))
     }
+
+    static ZERO = t(0);
+    static ONE = t(1);
 
     copyTo(a) {
         for (var b = this.t - 1; 0 <= b; --b) a[b] = this[b];
@@ -912,8 +917,6 @@ m = 97;
 for (n = 10; 36 > n; ++n) y[m++] = n;
 m = 65;
 for (n = 10; 36 > n; ++n) y[m++] = n;
-BigInteger.ZERO = t(0);
-BigInteger.ONE = t(1);
 v.prototype.convert = E;
 v.prototype.revert = E;
 
