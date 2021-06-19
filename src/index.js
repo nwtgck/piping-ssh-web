@@ -149,7 +149,7 @@ import {SshClientSettings} from "./settings";
         return c.join("");
     }
 
-    // Starts the SSH client in scripts/transport.js
+    // Starts the SSH client in scripts/transport.ts
     window.startSSHy = function () {
         var termUsername = document.getElementById('username').value
         var termPassword = document.getElementById('password').value
