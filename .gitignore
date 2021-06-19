@@ -1,3 +1,2 @@
-
-.jshintrc
-/js/combinedLibs.comb.js
+/node_modules
+/dist

@@ -46,21 +46,15 @@ Both SHA1 and SHA256 are supported for diffie-hellman and HMAC algorithms.
 
 e.g. <https://piping-ssh.netlify.app/#?user=myuser&password=mypass&s_port=22&cs_path=aaa&sc_path=bbb>
 
-## Build
+## Build & Serve
 
 This project utilises the [Google Closure Compiler](https://github.com/google/closure-compiler) to minify and compile the JavaScript.
 
 ```bash
-java -jar closure-compiler.jar --js_output_file=js/combinedLibs.comb.js js/defines.js js/src/*.js js/*.js '!**.comb.js' 
+npm run serve
 ```
 
-Serve as follows.
-
-```bash
-python3 -m http.server
-```
-
-Then, open <http://localhost:8000> on your browser.
+Then, open <http://localhost:8080> on your browser.
 
 [Piping Server]: https://github.com/nwtgck/piping-server
 [SSHy]: https://github.com/stuicey/SSHy
