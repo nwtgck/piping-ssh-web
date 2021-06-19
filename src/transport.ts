@@ -5,6 +5,7 @@ import {filter, fromUtf8, inflate_long, read_rng} from "./lib/utilities";
 import {SshClientAuth} from "./auth_handler";
 import {SshClientParceler} from "./parceler";
 import {SshClientSettings} from "./settings";
+import {SshClientKex, SshClientKexDiffieHellman} from "./dhKex";
 
 export class SshClientTransport {
   local_version = 'SSH-2.0-SSHyClient';
@@ -46,22 +47,22 @@ export class SshClientTransport {
     - returns <object> KEX algorithm */
   kex_info = {
     'diffie-hellman-group1-sha1': function (self) {
-      return new SSHyClient.kex.DiffieHellman(self, 1, 'SHA-1');
+      return new SshClientKexDiffieHellman(self, 1, 'SHA-1');
     },
     'diffie-hellman-group14-sha1': function (self) {
-      return new SSHyClient.kex.DiffieHellman(self, 14, 'SHA-1');
+      return new SshClientKexDiffieHellman(self, 14, 'SHA-1');
     },
     'diffie-hellman-group-exchange-sha1': function (self) {
-      return new SSHyClient.kex.DiffieHellman(self, undefined, 'SHA-1');
+      return new SshClientKexDiffieHellman(self, undefined, 'SHA-1');
     },
     'diffie-hellman-group1-sha256': function (self) {
-      return new SSHyClient.kex.DiffieHellman(self, 1, 'SHA-256');
+      return new SshClientKexDiffieHellman(self, 1, 'SHA-256');
     },
     'diffie-hellman-group14-sha256': function (self) {
-      return new SSHyClient.kex.DiffieHellman(self, 14, 'SHA-256');
+      return new SshClientKexDiffieHellman(self, 14, 'SHA-256');
     },
     'diffie-hellman-group-exchange-sha256': function (self) {
-      return new SSHyClient.kex.DiffieHellman(self, undefined, 'SHA-256');
+      return new SshClientKexDiffieHellman(self, undefined, 'SHA-256');
     }
   }
 
@@ -328,10 +329,10 @@ export class SshClientTransport {
   */
   generate_key(char, size) {
     var m = new SSHyClient.Message();
-    m.add_mpint(SSHyClient.kex.K);
-    m.add_bytes(SSHyClient.kex.H);
+    m.add_mpint(SshClientKex.K);
+    m.add_bytes(SshClientKex.H);
     m.add_bytes(char);
-    m.add_bytes(SSHyClient.kex.sessionId);
+    m.add_bytes(SshClientKex.sessionId);
 
     return this.preferred_kex.SHAVersion == 'SHA-1' ? new SSHyClient.hash.SHA1(m.toString()).digest().substring(0, size) : new SSHyClient.hash.SHA256(m.toString()).digest().substring(0, size);
   }
