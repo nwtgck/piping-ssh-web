@@ -11,6 +11,7 @@ import "./transport";
 import {splitSlice} from "./lib/utilities";
 import {Terminal} from "xterm";
 import {FitAddon} from 'xterm-addon-fit';
+import {SshClientTransport} from "./transport";
 
 (() => {
     function randomString(len){
@@ -189,7 +190,7 @@ import {FitAddon} from 'xterm-addon-fit';
                 allowHTTP1ForStreamingUpload: true,
             });
 
-            transport = new SSHyClient.Transport(settings, sendBinaryString);
+            transport = new SshClientTransport(settings, sendBinaryString);
             transport.auth.termUsername = termUsername;
             transport.auth.termPassword = termPassword;
 

@@ -3,7 +3,7 @@ import {filter, fromUtf8, inflate_long, read_rng} from "./lib/utilities";
 import {SshClientAuth} from "./auth_handler";
 import {SshClientParceler} from "./parceler";
 
-SSHyClient.Transport = function (settings, sendBinaryString) {
+export const SshClientTransport = function (settings, sendBinaryString) {
   this.local_version = 'SSH-2.0-SSHyClient';
   this.remote_version = '';
 
@@ -35,7 +35,7 @@ SSHyClient.Transport = function (settings, sendBinaryString) {
   this.closing = false;
 };
 
-SSHyClient.Transport.prototype = {
+SshClientTransport.prototype = {
   /* 	Lookup table for all of our supported KEX algorithms
     - Called by kex_info[<string> id]
     - returns <object> KEX algorithm */
@@ -76,7 +76,7 @@ SSHyClient.Transport.prototype = {
   /*
     A table storing various function calls corresponding to the Message ID numbers defined [https://www.ietf.org/rfc/rfc4250.txt]
     called like :
-      `handler_table[id](<object> SSHyClient.transport, <string> message)`
+      `handler_table[id](<object> SshClientTransport, <string> message)`
   */
   handler_table: {
     /* Sends our local SSH version to the SSH server */
