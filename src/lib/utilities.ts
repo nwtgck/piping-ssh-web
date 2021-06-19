@@ -13,13 +13,15 @@ export function deflate_long(a: number | any, c: boolean | undefined) {
   a = "number" == typeof a ? new BigInteger(a.toString(), 10) : a.clone();
   c = void 0 == c ? !0 : c;
   for (var b = "", d = new BigInteger("-1", 10), f = new BigInteger("ffffffff", 16); !a.equals(BigInteger.ZERO) && !a.equals(d);) b = struct.pack("I", a.and(f)) + b, a = a.shiftRight(32);
-  for (var f: any = !1, e = 0; e < b.length; ++e) {
+  f = !1 as any;
+  let e = 0
+  for (; e < b.length; ++e) {
     if (a.equals(BigInteger.ZERO) && "\x00" != b.charAt(e)) {
-      f = !0;
+      f = !0 as any;
       break
     }
     if (a.equals(d) && "\u00ff" != b.charAt(e)) {
-      f = !0;
+      f = !0 as any;
       break
     }
   }
