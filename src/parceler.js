@@ -2,7 +2,7 @@ import {SSHyClient} from "./defines";
 import {struct} from "./lib/struct";
 import {read_rng} from "./lib/utilities";
 
-SSHyClient.parceler = function (transport, sendBinaryString) {
+export const SshClientParceler = function (transport, sendBinaryString) {
   this.sendBinaryString = sendBinaryString;
   this.transport = transport;
   this.encrypting = false;
@@ -27,7 +27,7 @@ SSHyClient.parceler = function (transport, sendBinaryString) {
   this.recieveData = this.transmitData = 0;
 };
 
-SSHyClient.parceler.prototype = {
+SshClientParceler.prototype = {
   // Send / Encrypt messages to the websocket proxy
   send: function (data) {
     // Encapsulate the data with padding and length

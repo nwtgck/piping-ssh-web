@@ -1,6 +1,7 @@
 import {SSHyClient} from "./defines";
 import {filter, fromUtf8, inflate_long, read_rng} from "./lib/utilities";
 import {SshClientAuth} from "./auth_handler";
+import {SshClientParceler} from "./parceler";
 
 SSHyClient.Transport = function (settings, sendBinaryString) {
   this.local_version = 'SSH-2.0-SSHyClient';
@@ -25,7 +26,7 @@ SSHyClient.Transport = function (settings, sendBinaryString) {
   this.preferred_hash = null;
 
   // Other SSHyClient module classes
-  this.parceler = new SSHyClient.parceler(this, sendBinaryString);
+  this.parceler = new SshClientParceler(this, sendBinaryString);
   this.auth = new SshClientAuth(this.parceler);
   this.settings = settings === undefined ? new SSHyClient.settings() : settings;
 
