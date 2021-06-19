@@ -60,7 +60,7 @@ export class SshClientMessage {
     return this;
   }
 
-  add_mpint(d: number) {
+  add_mpint(d: number | null) {
     this.add_string(deflate_long(d));
     return this;
   }
