@@ -1,32 +1,32 @@
 import {BigInteger} from "./BigInteger";
 
-export var struct = {
-  pack: function (e, a) {
+export const struct = {
+  pack: function (e: string, a: BigInteger) {
     var b = "";
     switch (e) {
       case "Q":
         var d = new BigInteger("ff", 16),
-            b = b + String.fromCharCode(a.shiftRight(56).and(d)),
-            b = b + String.fromCharCode(a.shiftRight(48).and(d)),
-            b = b + String.fromCharCode(a.shiftRight(40).and(d)),
-            b = b + String.fromCharCode(a.shiftRight(32).and(d)),
-            b = b + String.fromCharCode(a.shiftRight(24).and(d)),
-            b = b + String.fromCharCode(a.shiftRight(16).and(d)),
-            b = b + String.fromCharCode(a.shiftRight(8).and(d)),
-            b = b + String.fromCharCode(a.and(d));
+            b = b + String.fromCharCode(a.shiftRight(56).and(d) as any as number),
+            b = b + String.fromCharCode(a.shiftRight(48).and(d) as any as number),
+            b = b + String.fromCharCode(a.shiftRight(40).and(d) as any as number),
+            b = b + String.fromCharCode(a.shiftRight(32).and(d) as any as number),
+            b = b + String.fromCharCode(a.shiftRight(24).and(d) as any as number),
+            b = b + String.fromCharCode(a.shiftRight(16).and(d) as any as number),
+            b = b + String.fromCharCode(a.shiftRight(8).and(d) as any as number),
+            b = b + String.fromCharCode(a.and(d) as any as number);
         break;
       case "I":
-        b += String.fromCharCode(a >>>
-            24 & 255), b += String.fromCharCode(a >>> 16 & 255), b += String.fromCharCode(a >>> 8 & 255);
+        b += String.fromCharCode((a as any) >>>
+            24 & 255), b += String.fromCharCode((a as any) >>> 16 & 255), b += String.fromCharCode((a as any) >>> 8 & 255);
       case "B":
-        b += String.fromCharCode(a & 255)
+        b += String.fromCharCode((a as any) & 255)
     }
     return b
   },
-  unpack: function (e, a) {
+  unpack: function (e: string, a: string) {
     var b = [],
-        d = 0,
-        c = 0;
+        d = 0;
+    let c: number | BigInteger = 0;
     switch (e) {
       case "Q":
         c = new BigInteger("0", 10);

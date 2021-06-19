@@ -472,7 +472,7 @@ export class BigInteger {
         return 0 < this.compareTo(a) ? this : a
     }
 
-    and(a) {
+    and(a): BigInteger {
         var b = l();
         this.bitwiseTo(a, I, b);
         return b

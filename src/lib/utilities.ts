@@ -5,6 +5,7 @@ export function inflate_long(a: string) {
   var c = new BigInteger("0", 10);
   a.length % 4 && (a = Array(4 - a.length % 4 + 1).join("\x00") + a);
   for (var b = 0; b < a.length; b += 4)
+    // @ts-ignore
     c = c.shiftLeft(32), c = c.add(new BigInteger(struct.unpack("I", a.substring(b, b + 4))[0].toString(), 10));
   return c
 }
