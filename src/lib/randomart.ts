@@ -3,7 +3,7 @@
 	to run in web browsers based on SSH RSA keys
 */
 
-export var symbols = {
+export const symbols = {
   "-2": "E",
   "-1": "S",
   "0": " ",
@@ -21,15 +21,15 @@ export var symbols = {
   "12": "#",
   "13": "/",
   "14": "^"
-};
+} as const;
 
-export var bounds = {
+export const bounds = {
   width: 17,
   height: 9
 };
 
-export function createBoard(bounds) {
-  var result = [];
+export function createBoard(bounds: {width: number, height: number}): number[][] {
+  var result: number[][] = [];
 
   for (var i = 0; i < bounds.width; i++) {
     result[i] = [];
@@ -40,7 +40,7 @@ export function createBoard(bounds) {
   return result;
 }
 
-export function generateBoard(data) {
+export function generateBoard(data: number[]) {
   var board = createBoard(bounds);
 
   var x = Math.floor(bounds.width / 2);
@@ -83,28 +83,29 @@ export function generateBoard(data) {
   return board;
 }
 
-export function boardToString(board) {
-  var result = [];
+export function boardToString(board: number[][]) {
+  var result: string[][] = [];
 
   for (var i = 0; i < bounds.height; i++) {
     result[i] = [];
     for (var j = 0; j < bounds.width; j++) {
+      // @ts-ignore
       result[i][j] = symbols[board[j][i]] || symbols[0];
     }
     // Add | to start and end of result[i]
-    result[i] = '|' + result[i].join('') + '|';
+    result[i] = '|' + result[i].join('') + '|' as any;
   }
-  result.splice(0, 0, '\n+---[ RSA2048 ]---+');
-  result.push('+-----------------+');
+  result.splice(0, 0, '\n+---[ RSA2048 ]---+' as any);
+  result.push('+-----------------+' as any);
   return result.join('\n');
 }
 
-export function randomart(data) {
-  var buffer = [];
+export function randomart(data: number[]) {
+  var buffer: string[] = [];
   for (var i = 0, length = data.length; i < length; i++) {
     buffer.push('0x' + data[i]);
   }
   // Write the board to HTML
-  document.getElementById('hostKeyImg').innerHTML = boardToString(generateBoard(buffer));
+  document.getElementById('hostKeyImg')!.innerHTML = boardToString(generateBoard(buffer as any));
   return;
 }
