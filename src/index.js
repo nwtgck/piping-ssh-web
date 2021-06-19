@@ -12,6 +12,7 @@ import {splitSlice} from "./lib/utilities";
 import {Terminal} from "xterm";
 import {FitAddon} from 'xterm-addon-fit';
 import {SshClientTransport} from "./transport";
+import {SshClientSettings} from "./settings";
 
 (() => {
     function randomString(len){
@@ -52,7 +53,7 @@ import {SshClientTransport} from "./transport";
         setCommandHint();
 
         // Sets the default colorScheme to material
-        settings = new SSHyClient.settings();
+        settings = new SshClientSettings();
         settings.setColorScheme(1);
 
         // Connect upon hitting Enter from the password field

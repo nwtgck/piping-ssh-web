@@ -1,7 +1,7 @@
 import {SSHyClient} from "./defines";
 import {modColorPercent} from "./lib/utilities";
 
-SSHyClient.settings = function () {
+export const SshClientSettings = function () {
   // Local echo reduces latency on regular key presses to aruond 0.04s compared to ~0.2s without it
   this.localEcho = 0; // 0 - off; 1 - auto; 2 - on
 
@@ -32,7 +32,7 @@ SSHyClient.settings = function () {
 
   this.rsaCheckEnabled = true;
 };
-SSHyClient.settings.prototype = {
+SshClientSettings.prototype = {
   // All our supported terminal color themes in [bg, color1, .... , color15, cursor, fg]
   colorSchemes: [
     ['Solarized', {
