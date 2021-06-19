@@ -1,29 +1,29 @@
 import {BigInteger} from "./BigInteger";
 
 export const struct = {
-  pack: function (e: string, a: BigInteger) {
+  pack: function (e: string, a: number | BigInteger) {
     var b = "";
     switch (e) {
       case "Q":
         var d = new BigInteger("ff", 16),
-            b = b + String.fromCharCode(a.shiftRight(56).and(d) as any as number),
-            b = b + String.fromCharCode(a.shiftRight(48).and(d) as any as number),
-            b = b + String.fromCharCode(a.shiftRight(40).and(d) as any as number),
-            b = b + String.fromCharCode(a.shiftRight(32).and(d) as any as number),
-            b = b + String.fromCharCode(a.shiftRight(24).and(d) as any as number),
-            b = b + String.fromCharCode(a.shiftRight(16).and(d) as any as number),
-            b = b + String.fromCharCode(a.shiftRight(8).and(d) as any as number),
-            b = b + String.fromCharCode(a.and(d) as any as number);
+            b = b + String.fromCharCode((a as BigInteger).shiftRight(56).and(d) as any as number),
+            b = b + String.fromCharCode((a as BigInteger).shiftRight(48).and(d) as any as number),
+            b = b + String.fromCharCode((a as BigInteger).shiftRight(40).and(d) as any as number),
+            b = b + String.fromCharCode((a as BigInteger).shiftRight(32).and(d) as any as number),
+            b = b + String.fromCharCode((a as BigInteger).shiftRight(24).and(d) as any as number),
+            b = b + String.fromCharCode((a as BigInteger).shiftRight(16).and(d) as any as number),
+            b = b + String.fromCharCode((a as BigInteger).shiftRight(8).and(d) as any as number),
+            b = b + String.fromCharCode((a as BigInteger).and(d) as any as number);
         break;
       case "I":
-        b += String.fromCharCode((a as any) >>>
+        b += String.fromCharCode((a as number) >>>
             24 & 255), b += String.fromCharCode((a as any) >>> 16 & 255), b += String.fromCharCode((a as any) >>> 8 & 255);
       case "B":
-        b += String.fromCharCode((a as any) & 255)
+        b += String.fromCharCode((a as number) & 255)
     }
     return b
   },
-  unpack: function (e: string, a: string) {
+  unpack: function (e: string, a: string): any[] {
     var b = [],
         d = 0;
     let c: number | BigInteger = 0;

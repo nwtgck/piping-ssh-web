@@ -1,4 +1,5 @@
 import {SSHyClient} from "./defines";
+import {SshClientMessage} from "./message";
 
 export const SshClientAuth = function (parceler) {
   this.parceler = parceler; // We shouldn't need anything from the transport handler
@@ -13,7 +14,7 @@ export const SshClientAuth = function (parceler) {
 SshClientAuth.prototype = {
   // Requests we want to authenticate ourselves with the SSH server
   request_auth: function () {
-    var m = new SSHyClient.Message();
+    var m = new SshClientMessage();
     m.add_bytes(String.fromCharCode(SSHyClient.MSG_SERVICE_REQUEST));
     m.add_string('ssh-userauth');
     this.parceler.send(m);
@@ -28,7 +29,7 @@ SshClientAuth.prototype = {
       return;
     }
 
-    var m = new SSHyClient.Message();
+    var m = new SshClientMessage();
     m.add_bytes(String.fromCharCode(SSHyClient.MSG_USERAUTH_REQUEST));
     m.add_string(this.termUsername);
     m.add_string("ssh-connection");
@@ -64,7 +65,7 @@ SshClientAuth.prototype = {
   // Opens a channel - generally called right after authenticating with the SSH server
   open_channel: function (type, onsuccess) {
     onsuccess = onsuccess === undefined ? null : onsuccess;
-    var m = new SSHyClient.Message();
+    var m = new SshClientMessage();
     m.add_bytes(String.fromCharCode(SSHyClient.MSG_CHANNEL_OPEN));
     m.add_string(type);
     m.add_int(1);
@@ -80,7 +81,7 @@ SshClientAuth.prototype = {
       return;
     }
 
-    var m = new SSHyClient.Message();
+    var m = new SshClientMessage();
     m.add_bytes(String.fromCharCode(SSHyClient.MSG_CHANNEL_REQUEST));
     m.add_int(0);
     m.add_string(type);
@@ -109,7 +110,7 @@ SshClientAuth.prototype = {
   // Invokes the interactive terminal using the pseudo-terminal channel
   invoke_shell: function () {
     // Craft the shell invocation packet
-    var m = new SSHyClient.Message();
+    var m = new SshClientMessage();
     m.add_bytes(String.fromCharCode(SSHyClient.MSG_CHANNEL_REQUEST));
     m.add_int(0);
     m.add_string('shell');

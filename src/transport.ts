@@ -6,6 +6,7 @@ import {SshClientAuth} from "./auth_handler";
 import {SshClientParceler} from "./parceler";
 import {SshClientSettings} from "./settings";
 import {SshClientKex, SshClientKexDiffieHellman} from "./dhKex";
+import {SshClientMessage} from "./message";
 
 export class SshClientTransport {
   local_version = 'SSH-2.0-SSHyClient';
@@ -111,7 +112,7 @@ export class SshClientTransport {
     },
     /* SSH_MSG_SERVICE_ACCEPT: sent by the SSH server after the client request's a service (post-kex) */
     6: function (self, m) {
-      var service = new SSHyClient.Message(m.slice(1)).get_string();
+      var service = new SshClientMessage(m.slice(1)).get_string();
       // Check th type of message sent by the server and start the appropriate service
       if (service == "ssh-userauth") {
         self.auth.ssh_connection();
@@ -220,7 +221,7 @@ export class SshClientTransport {
   Using WINDOW_SIZE from puTTy
   */
   winAdjust() {
-    var m = new SSHyClient.Message();
+    var m = new SshClientMessage();
     m.add_bytes(String.fromCharCode(SSHyClient.MSG_CHANNEL_WINDOW_ADJUST));
     m.add_int(0);
     m.add_int(SSHyClient.WINDOW_SIZE);
@@ -232,7 +233,7 @@ export class SshClientTransport {
   disconnect(reason) {
     this.closing = true;
     reason = reason === undefined ? 11 : reason;
-    var m = new SSHyClient.Message();
+    var m = new SshClientMessage();
     m.add_bytes(String.fromCharCode(SSHyClient.MSG_DISCONNECT));
     m.add_int(reason);
     this.send_packet(m.toString());
@@ -241,7 +242,7 @@ export class SshClientTransport {
 
   // Sends a null packet to the SSH server to keep the connection alive
   keepAlive() {
-    var m = new SSHyClient.Message();
+    var m = new SshClientMessage();
     m.add_bytes(String.fromCharCode(SSHyClient.MSG_IGNORE));
     m.add_string('');
 
@@ -262,7 +263,7 @@ export class SshClientTransport {
 
   // Initiates the key exchange process by sending our supported algorithms & ciphers
   send_kex_init() {
-    var m = new SSHyClient.Message();
+    var m = new SshClientMessage();
     m.add_bytes(String.fromCharCode(SSHyClient.MSG_KEX_INIT));
     // add 16 random bytes
     m.add_bytes(read_rng(16));
@@ -286,7 +287,7 @@ export class SshClientTransport {
 
   // Parses the server's kex init and selects best fit algorithms & ciphers
   parse_kex_reply(m) {
-    m = new SSHyClient.Message(m);
+    m = new SshClientMessage(m);
     // Cuts the 16 byte random cookie and message flags from the beginning
     m.get_bytes(17);
 
@@ -328,7 +329,7 @@ export class SshClientTransport {
     E = Integrity Key 	client -> server
   */
   generate_key(char, size) {
-    var m = new SSHyClient.Message();
+    var m = new SshClientMessage();
     m.add_mpint(SshClientKex.K);
     m.add_bytes(SshClientKex.H);
     m.add_bytes(char);
@@ -391,7 +392,7 @@ export class SshClientTransport {
       return;
     }
     // encapsulates a character or command and sends it to the SSH server
-    var m = new SSHyClient.Message();
+    var m = new SshClientMessage();
     m.add_bytes(String.fromCharCode(SSHyClient.MSG_CHANNEL_DATA));
     m.add_int(0);
     m.add_string(this.str_to_bytes(command.toString()));
@@ -401,7 +402,7 @@ export class SshClientTransport {
 
   // Sends the new keys message signaling we're using the generated keys from now on
   send_new_keys(SHAVersion) {
-    var m = new SSHyClient.Message();
+    var m = new SshClientMessage();
     m.add_bytes(String.fromCharCode(SSHyClient.MSG_NEW_KEYS));
 
     this.send_packet(m);
