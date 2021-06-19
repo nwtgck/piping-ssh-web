@@ -34,7 +34,7 @@ export function deflate_long(a: number | any, c: boolean | undefined) {
 }
 
 // Converts strings to byte arrays
-export function toByteArray(a: string) {
+export function toByteArray(a: string): Uint8Array {
   const bufView = new Uint8Array(a.length);
   for (let i = 0; i < a.length; i++) {
     bufView[i] = a.charCodeAt(i);
