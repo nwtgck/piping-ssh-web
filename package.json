@@ -4,10 +4,8 @@
   "description": "SSH over HTTPS via Piping Server",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build0": "java -jar closure-compiler.jar --js_output_file=js/combinedLibs.comb.js src/defines.js js/src/*.js js/*.js '!**.comb.js'",
     "build": "webpack --mode production",
-    "serve": "webpack-cli serve --mode development",
-    "serve0": "watch-build-serve -i=.git -i=.idea -i=./node_modules -i=js/combinedLibs.comb.js --public=. --build-command='npm run build'"
+    "serve": "webpack-cli serve --mode development"
   },
   "repository": {
     "type": "git",
