@@ -42,6 +42,7 @@ import urlJoin from "url-join";
 
         document.getElementById('login_cred').style.display = "block";
 
+        document.getElementById('piping_server').value = parseHashAsQuery().get("server") || "https://ppng.io";
         document.getElementById('username').value = parseHashAsQuery().get("user") || "";
         document.getElementById('password').value = parseHashAsQuery().get("password") || "";
 
@@ -114,14 +115,10 @@ import urlJoin from "url-join";
         document.getElementById('failure').style.display = "block"
     }
 
-    function getPipingServerUrl() {
-        return document.getElementById('piping_server').value;
-    }
-
     window.setCommandHint = function () {
         const port = parseHashAsQuery().get("s_port") || "22";
         const hintTextarea = document.getElementById('server_host_command_hint');
-        const pipingServerUrl = getPipingServerUrl();
+        const pipingServerUrl = document.getElementById('piping_server').value;
         const path1 = document.getElementById('path1').value;
         const path2 = document.getElementById('path2').value;
 
@@ -153,7 +150,7 @@ import urlJoin from "url-join";
     window.startSSHy = function () {
         var termUsername = document.getElementById('username').value
         var termPassword = document.getElementById('password').value
-        const pipingServerUrl = getPipingServerUrl();
+        const pipingServerUrl = document.getElementById('piping_server').value;
         const path1 = document.getElementById('path1').value;
         const path2 = document.getElementById('path2').value;
 
