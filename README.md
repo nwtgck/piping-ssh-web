@@ -46,6 +46,15 @@ Both SHA1 and SHA256 are supported for diffie-hellman and HMAC algorithms.
 
 e.g. <https://piping-ssh.netlify.app/#?user=myuser&password=mypass&s_port=22&cs_path=aaa&sc_path=bbb>
 
+* `user`: SSH user name
+* `password`: SSH user password
+* `server`: Piping Server URL
+* `cs_path`: Server-to-client path
+* `sc_path`: Client-to-server path
+* `s_port`: Server port
+* `headers`: HTTP headers to Piping Server
+    - (e.g. `[["X-MyExtra1", "myvalue1"], ["Content-Type", "application/myapp"]]`)
+
 ## Build & Serve
 
 This project utilises the [Google Closure Compiler](https://github.com/google/closure-compiler) to minify and compile the JavaScript.
