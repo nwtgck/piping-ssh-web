@@ -181,10 +181,18 @@ import urlJoin from "url-join";
             settings.setNetTraffic(transport.parceler.transmitData, false);
         }
 
+        let pipingServerHeaders = undefined;
+        const pipingServerHeadersQuery = parseHashAsQuery().get('headers');
+        if (pipingServerHeadersQuery) {
+            // NOTE: type should be Array<[string, string]>
+            pipingServerHeaders = new Headers(JSON.parse(decodeURIComponent(pipingServerHeadersQuery)));
+        }
+
         (async () => {
             fetch(urlJoin(pipingServerUrl, path1), {
                 method: "POST",
                 body: readable,
+                headers: pipingServerHeaders,
                 allowHTTP1ForStreamingUpload: true,
             });
 
@@ -192,7 +200,9 @@ import urlJoin from "url-join";
             transport.auth.termUsername = termUsername;
             transport.auth.termPassword = termPassword;
 
-            const res = await fetch(urlJoin(pipingServerUrl, path2));
+            const res = await fetch(urlJoin(pipingServerUrl, path2), {
+                headers: pipingServerHeaders,
+            });
             const reader = res.body.getReader();
             while(true) {
                 const {value, done} = await reader.read();
