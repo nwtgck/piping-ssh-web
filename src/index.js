@@ -8,9 +8,9 @@ import "./parceler";
 import "./rsaKey";
 import "./settings";
 import "./transport";
-import {splitSlice} from "./lib/utilities";
 import {Terminal} from "xterm";
 import {FitAddon} from 'xterm-addon-fit';
+import urlJoin from "url-join";
 
 (() => {
     function randomString(len){
@@ -114,20 +114,22 @@ import {FitAddon} from 'xterm-addon-fit';
         document.getElementById('failure').style.display = "block"
     }
 
+    function getPipingServerUrl() {
+        return document.getElementById('piping_server').value;
+    }
+
     window.setCommandHint = function () {
         const port = parseHashAsQuery().get("s_port") || "22";
         const hintTextarea = document.getElementById('server_host_command_hint');
-        const pipingServerUrl = document.getElementById('piping_server').value;
+        const pipingServerUrl = getPipingServerUrl();
         const path1 = document.getElementById('path1').value;
         const path2 = document.getElementById('path2').value;
 
         if (path1 === '' || path2 === '') return;
 
-        const escapedPipingServerUrl = pipingServerUrl.replace(/:/g, '\\:').replace(/\/$/, '') ;
+        const ncCommand = `curl -sSN ${urlJoin(pipingServerUrl, path1)} | nc localhost ${port} | curl -sSNT - ${urlJoin(pipingServerUrl, path2)}`;
 
-        const socatCommand = `socat 'EXEC:curl -NsS ${escapedPipingServerUrl}/${path1}!!EXEC:curl -NsST - ${escapedPipingServerUrl}/${path2}' TCP:127.0.0.1:${port}`;
-
-        hintTextarea.value = socatCommand;
+        hintTextarea.value = ncCommand;
     }
 
     function stringToUint8Array(str) {
@@ -151,7 +153,7 @@ import {FitAddon} from 'xterm-addon-fit';
     window.startSSHy = function () {
         var termUsername = document.getElementById('username').value
         var termPassword = document.getElementById('password').value
-        const pipingServerUrl = document.getElementById('piping_server').value.replace(/\/$/, '');
+        const pipingServerUrl = getPipingServerUrl();
         const path1 = document.getElementById('path1').value;
         const path2 = document.getElementById('path2').value;
 
@@ -183,7 +185,7 @@ import {FitAddon} from 'xterm-addon-fit';
         }
 
         (async () => {
-            fetch(`${pipingServerUrl}/${path1}`, {
+            fetch(urlJoin(pipingServerUrl, path1), {
                 method: "POST",
                 body: readable,
                 allowHTTP1ForStreamingUpload: true,
@@ -193,7 +195,7 @@ import {FitAddon} from 'xterm-addon-fit';
             transport.auth.termUsername = termUsername;
             transport.auth.termPassword = termPassword;
 
-            const res = await fetch(`${pipingServerUrl}/${path2}`);
+            const res = await fetch(urlJoin(pipingServerUrl, path2));
             const reader = res.body.getReader();
             while(true) {
                 const {value, done} = await reader.read();
