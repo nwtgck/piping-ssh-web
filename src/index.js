@@ -220,7 +220,9 @@ import urlJoin from "url-join";
         term.loadAddon(fitAddon);
 
         // start xterm.js
-        term.open(document.getElementById('terminal'), true);
+        const terminalElement = document.getElementById('terminal');
+        terminalElement.style.display = null;
+        term.open(terminalElement, true);
         fitAddon.fit();
         term.focus()
 
