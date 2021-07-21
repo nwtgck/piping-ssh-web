@@ -2,7 +2,7 @@
 SSH over HTTPS via [Piping Server](https://github.com/nwtgck/piping-server)
 
 ## Application
-<https://piping-ssh.netlify.app>
+<https://piping-ssh.nwtgck.org>
 
 
 ### Requirement
@@ -44,7 +44,7 @@ Both SHA1 and SHA256 are supported for diffie-hellman and HMAC algorithms.
 
 ## URL fragment parameters
 
-e.g. <https://piping-ssh.netlify.app/#?user=myuser&password=mypass&s_port=22&cs_path=aaa&sc_path=bbb>
+e.g. <https://piping-ssh.nwtgck.org/#?user=myuser&password=mypass&s_port=22&cs_path=aaa&sc_path=bbb>
 
 * `user`: SSH user name
 * `password`: SSH user password
