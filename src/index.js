@@ -24,15 +24,25 @@ import urlJoin from "url-join";
         return url.searchParams;
     }
 
-    window.onload = function () {
-        // (base: https://web.dev/fetch-upload-streaming/#feature-detection)
-        const supportsRequestStreams = !new Request('', {
-            body: new ReadableStream(),
+    // (from: https://web.dev/fetch-upload-streaming/#feature-detection)
+    // (from: https://github.com/whatwg/fetch/issues/1275#issue-955832232)
+    const supportsRequestStreamsPromise = (async () => {
+        const supportsStreamsInRequestObjects = !new Request('', {
             method: 'POST',
+            body: new ReadableStream(),
         }).headers.has('Content-Type');
 
+        if (!supportsStreamsInRequestObjects) return false;
+
+        return fetch('data:a/a;charset=utf-8,', {
+            method: 'POST',
+            body: new ReadableStream(),
+        }).then(() => true, () => false);
+    })();
+
+    window.onload = async function () {
         // If not support fetch() upload streaming
-        if (!supportsRequestStreams) {
+        if (!(await supportsRequestStreamsPromise)) {
             // Hide login card
             document.getElementById('login_cred').style.display = "none";
             // Show message
