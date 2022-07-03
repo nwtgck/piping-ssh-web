@@ -8,6 +8,10 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: npm i -g npm@8.5
       - name: Install
         run: npm ci
       - name: Build
