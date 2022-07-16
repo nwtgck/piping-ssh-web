@@ -30,6 +30,7 @@ import urlJoin from "url-join";
         const supportsStreamsInRequestObjects = !new Request('', {
             method: 'POST',
             body: new ReadableStream(),
+            duplex: 'half',
         }).headers.has('Content-Type');
 
         if (!supportsStreamsInRequestObjects) return false;
@@ -37,6 +38,7 @@ import urlJoin from "url-join";
         return fetch('data:a/a;charset=utf-8,', {
             method: 'POST',
             body: new ReadableStream(),
+            duplex: 'half',
         }).then(() => true, () => false);
     })();
 
@@ -203,6 +205,7 @@ import urlJoin from "url-join";
                 method: "POST",
                 body: readable,
                 headers: pipingServerHeaders,
+                duplex: 'half',
                 allowHTTP1ForStreamingUpload: true,
             });
 
