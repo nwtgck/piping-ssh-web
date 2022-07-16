@@ -206,7 +206,6 @@ import urlJoin from "url-join";
                 body: readable,
                 headers: pipingServerHeaders,
                 duplex: 'half',
-                allowHTTP1ForStreamingUpload: true,
             });
 
             transport = new SSHyClient.Transport(settings, sendBinaryString);
