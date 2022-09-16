@@ -36,7 +36,7 @@
   "homepage": "https://github.com/nwtgck/piping-ssh-web#readme",
   "dependencies": {
     "url-join": "^5.0.0",
-    "xterm": "^4.19.0",
-    "xterm-addon-fit": "^0.5.0"
+    "xterm": "^5.0.0",
+    "xterm-addon-fit": "^0.6.0"
   }
 }
