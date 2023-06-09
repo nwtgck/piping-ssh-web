@@ -1,7 +1,7 @@
 import {reactive} from "vue";
 
 // TODO: support multiple dialogs ?
-export const dialogsForGlobalStore = reactive({
+export const globalPromptStore = reactive({
   title: "",
   message: "",
   inputType: "",
@@ -18,12 +18,12 @@ export function showPrompt({title, message, inputType = "text", placeholder, wid
   placeholder?: string,
   width?: string,
 }): Promise<string | undefined> {
-  dialogsForGlobalStore.title = title;
-  dialogsForGlobalStore.message = message;
-  dialogsForGlobalStore.inputType = inputType;
-  dialogsForGlobalStore.placeholder = placeholder ?? "";
-  dialogsForGlobalStore.width = width;
-  dialogsForGlobalStore.shows = true;
+  globalPromptStore.title = title;
+  globalPromptStore.message = message;
+  globalPromptStore.inputType = inputType;
+  globalPromptStore.placeholder = placeholder ?? "";
+  globalPromptStore.width = width;
+  globalPromptStore.shows = true;
 
-  return new Promise((resolve) => dialogsForGlobalStore.resolveInput = resolve);
+  return new Promise((resolve) => globalPromptStore.resolveInput = resolve);
 }

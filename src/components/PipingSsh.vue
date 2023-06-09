@@ -36,7 +36,7 @@ import {aliveGoWasmWorkerRemotePromise, getAuthPublicKeyType, sshPrivateKeyIsEnc
 import {fragmentParams} from "@/fragment-params";
 import CopyToClipboardButton from "@/components/CopyToClipboardButton.vue";
 import {getServerHostCommand} from "@/getServerHostCommand";
-import {showPrompt} from "@/components/DialogsForGlobal/store";
+import {showPrompt} from "@/components/DialogsForGlobal/global-prompt";
 
 const props = defineProps<{
   pipingServerUrl: string,
