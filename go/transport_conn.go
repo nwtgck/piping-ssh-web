@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"errors"
-	"github.com/nwtgck/piping-ssh-go-wasm-prototype-web/jsutil"
+	"github.com/nwtgck/piping-ssh-web/go/jsutil"
 	"net"
 	"syscall/js"
 	"time"

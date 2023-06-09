@@ -1,4 +1,4 @@
-module github.com/nwtgck/piping-ssh-go-wasm-prototype-web
+module github.com/nwtgck/piping-ssh-web/go
 
 go 1.20
 

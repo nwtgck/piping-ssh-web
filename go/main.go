@@ -4,7 +4,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/nwtgck/piping-ssh-go-wasm-prototype-web/jsutil"
+	"github.com/nwtgck/piping-ssh-web/go/jsutil"
 	"golang.org/x/crypto/ssh"
 	"syscall/js"
 )
