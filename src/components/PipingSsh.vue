@@ -15,15 +15,10 @@
     </v-row>
   </v-container>
   <div ref="terminal" v-show="connectionState === 'connected'" style="width: 100%; height: calc(100% - 15px);"></div>
-
-  <v-snackbar v-model="showsSnackbar" location="top" :timeout="2500">
-    <v-icon v-if="snackbarIcon !== undefined" :icon="snackbarIcon"></v-icon>
-    {{ snackbarMessage }}
-  </v-snackbar>
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref, watch} from "vue";
+import {onMounted, ref} from "vue";
 import 'xterm/css/xterm.css';
 import urlJoin from "url-join";
 import * as Comlink from 'comlink';
@@ -36,7 +31,8 @@ import {aliveGoWasmWorkerRemotePromise, getAuthPublicKeyType, sshPrivateKeyIsEnc
 import {fragmentParams} from "@/fragment-params";
 import CopyToClipboardButton from "@/components/CopyToClipboardButton.vue";
 import {getServerHostCommand} from "@/getServerHostCommand";
-import {showPrompt} from "@/components/DialogsForGlobal/global-prompt";
+import {showPrompt} from "@/components/Globals/prompt/global-prompt";
+import {showSnackbar} from "@/components/Globals/snackbar/global-snackbar";
 
 const props = defineProps<{
   pipingServerUrl: string,
@@ -55,17 +51,6 @@ const connectionState = ref<"connecting" | "connected">("connecting");
 
 const terminal = ref<HTMLDivElement>();
 const serverHostKeyManager = new ServerHostKeyManager();
-const showsSnackbar = ref(false);
-const snackbarIcon = ref<string>();
-const snackbarMessage = ref<string>();
-
-watch(showsSnackbar, () => {
-  if (showsSnackbar.value) {
-    return;
-  }
-  snackbarIcon.value = undefined;
-  snackbarMessage.value = undefined;
-});
 
 const canceled = ref(false);
 
@@ -227,9 +212,10 @@ async function start() {
       getAuthPrivateKeyPassphrase,
       onAuthSigned: (sha256Fingerprint: string) => {
         const authKeySetForSsh: AuthKeySet = findAuthKeySetByFingerprint(sha256Fingerprint)!;
-        snackbarIcon.value = mdiKey;
-        snackbarMessage.value = `Signed by ${authKeySetForSsh.name}`;
-        showsSnackbar.value = true;
+        showSnackbar({
+          icon: mdiKey,
+          message: `Signed by ${authKeySetForSsh.name}`,
+        });
       },
       async onHostKey({ key }): Promise<boolean> {
         if (serverHostKeyManager.isTrusted(key.fingerprint)) {
@@ -252,19 +238,17 @@ async function start() {
         connectionState.value = "connected";
       },
     }));
-    snackbarIcon.value = mdiCheck;
-    snackbarMessage.value = "Finished";
-    showsSnackbar.value = true;
-    // TODO: remove wait. this wait is for toast. create global toast and use it
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    showSnackbar({
+      icon: mdiCheck,
+      message: "Finished",
+    });
     emit('end');
   } catch (e) {
     if (canceled.value) {
-      snackbarIcon.value = mdiCancel;
-      snackbarMessage.value = "Canceled";
-      showsSnackbar.value = true;
-      // TODO: remove wait. this wait is for toast. create global toast and use it
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      showSnackbar({
+        icon: mdiCancel,
+        message: "Canceled",
+      });
       emit('end');
       return;
     }

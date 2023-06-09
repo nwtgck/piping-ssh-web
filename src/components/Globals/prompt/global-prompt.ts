@@ -1,6 +1,6 @@
 import {reactive} from "vue";
 
-// TODO: support multiple dialogs ?
+// TODO: support multiple dialogs?
 export const globalPromptStore = reactive({
   title: "",
   message: "",

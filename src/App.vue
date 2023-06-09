@@ -117,7 +117,7 @@ import {AuthKeySet, storeAuthKeySet} from "@/authKeySets";
 import {getServerHostCommand} from "@/getServerHostCommand";
 import CopyToClipboardButton from "@/components/CopyToClipboardButton.vue";
 import {createRequiredRules} from "@/createRequiredRules";
-import DialogsForGlobal from "@/components/DialogsForGlobal/DialogsForGlobal.vue";
+import DialogsForGlobal from "@/components/Globals/Globals.vue";
 const PipingSsh = defineAsyncComponent(() => import("@/components/PipingSsh.vue"));
 const KeyManager = defineAsyncComponent(() => import("@/components/KeyManager.vue"));
 const KeysEditor = defineAsyncComponent(() => import("@/components/KeysEditor.vue"));
