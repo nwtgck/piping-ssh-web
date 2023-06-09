@@ -25,7 +25,7 @@ const storedAuthKeySetType = z.object({
   privateKey: z.string(),
   storeType: z.union([z.literal("memory"), z.literal("session_storage"), z.literal("local_storage")]),
   sha256Fingerprint: z.string(),
-  createdAtMillis: z.number(),
+  addedAtMillis: z.number(),
   enabled: z.boolean(),
 });
 
@@ -38,7 +38,7 @@ async function authKeySetToStored(authKeySet: AuthKeySet): Promise<StoredAuthKey
     privateKey: authKeySet.privateKey,
     storeType: authKeySet.storeType,
     sha256Fingerprint: await sshSha256Fingerprint(authKeySet.publicKey),
-    createdAtMillis: new Date().getTime(),
+    addedAtMillis: new Date().getTime(),
     enabled: true,
   };
 }
@@ -91,7 +91,7 @@ const storedAuthKeySetMap = computed<Map<string, StoredAuthKeySet>>(() => {
 
 export const storedAuthKeySets = computed<StoredAuthKeySet[]>(() => {
   return [...storedAuthKeySetMap.value.values()]
-    .sort((a, b) => a.createdAtMillis - b.createdAtMillis);
+    .sort((a, b) => a.addedAtMillis - b.addedAtMillis);
 });
 
 export function findStoredAuthKeySetByFingerprint(sha256Fingerprint: string): StoredAuthKeySet | undefined {
