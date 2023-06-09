@@ -23,6 +23,13 @@
             <v-btn @click="downloadText(`${editing.name}-pub.pem`, editing.publicKey)" :icon="mdiDownload" color="orange" variant="text"></v-btn>
           </template>
         </v-textarea>
+
+        <v-text-field :model-value="addToAuthorizedKeys(editing.publicKey)" label="Command to add to ~/.ssh/authorized_keys" variant="solo-filled" :readonly="true">
+          <template v-slot:append-inner>
+            <CopyToClipboardButton :text="addToAuthorizedKeys(editing.publicKey)"/>
+          </template>
+        </v-text-field>
+
         <DefinePrivateKeyAppendInner>
           <CopyToClipboardButton :text="editing.privateKey"/>
           <v-btn @click="fingerprintToShowPrivateKey[editing.sha256Fingerprint] = !fingerprintToShowPrivateKey[editing.sha256Fingerprint]" :icon="fingerprintToShowPrivateKey[editing.sha256Fingerprint] ? mdiEyeOff : mdiEye" variant="text"></v-btn>
@@ -84,6 +91,10 @@ function removeKeys(sha256Fingerprint: string) {
   expandedIndex.value = undefined;
   // TODO: confirm deletion OR undo feature
   removeAuthKeySet(sha256Fingerprint);
+}
+
+function addToAuthorizedKeys(publicKey: string): string {
+  return `mkdir -p ~/.ssh && echo '${publicKey.trim()}' >> ~/.ssh/authorized_keys`;
 }
 
 function downloadText(name: string, str: string) {
