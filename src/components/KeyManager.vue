@@ -19,22 +19,23 @@
         <v-btn color="secondary" @click="updateAuthKeySet(editing)" :disabled="!keySetChanged(editing)" style="margin-bottom: 2rem;">Update</v-btn>
         <v-textarea label="public key" :model-value="editing.publicKey" :readonly="true" variant="solo-filled">
           <template v-slot:append-inner>
-            <v-btn @click="downloadText(`${editing.name}-pub.pem`, editing.privateKey)" :icon="mdiDownload" color="orange" variant="text"></v-btn>
-            <!-- TODO: easy copy key UI -->
+            <CopyToClipboardButton :text="editing.publicKey"/>
+            <v-btn @click="downloadText(`${editing.name}-pub.pem`, editing.publicKey)" :icon="mdiDownload" color="orange" variant="text"></v-btn>
           </template>
         </v-textarea>
+        <DefinePrivateKeyAppendInner>
+          <CopyToClipboardButton :text="editing.privateKey"/>
+          <v-btn @click="fingerprintToShowPrivateKey[editing.sha256Fingerprint] = !fingerprintToShowPrivateKey[editing.sha256Fingerprint]" :icon="fingerprintToShowPrivateKey[editing.sha256Fingerprint] ? mdiEyeOff : mdiEye" variant="text"></v-btn>
+          <v-btn @click="downloadText(`${editing.name}-priv.pem`, editing.privateKey)" :icon="mdiDownload" color="orange" variant="text"></v-btn>
+        </DefinePrivateKeyAppendInner>
         <v-textarea v-if="fingerprintToShowPrivateKey[editing.sha256Fingerprint]" label="private key" :model-value="editing.privateKey" :readonly="true" variant="solo-filled">
-          <!-- TODO: duplicate buttons -->
           <template v-slot:append-inner>
-            <v-btn @click="fingerprintToShowPrivateKey[editing.sha256Fingerprint] = !fingerprintToShowPrivateKey[editing.sha256Fingerprint]" :icon="fingerprintToShowPrivateKey[editing.sha256Fingerprint] ? mdiEyeOff : mdiEye" variant="text"></v-btn>
-            <v-btn @click="downloadText(`${editing.name}-priv.pem`, editing.privateKey)" :icon="mdiDownload" color="orange" variant="text"></v-btn>
+            <ReusePrivateKeyAppendInner/>
           </template>
         </v-textarea>
         <v-text-field v-if="!fingerprintToShowPrivateKey[editing.sha256Fingerprint]" label="private key" type="password" :model-value="editing.privateKey" :readonly="true" variant="solo-filled">
-          <!-- TODO: duplicate buttons -->
           <template v-slot:append-inner>
-            <v-btn @click="fingerprintToShowPrivateKey[editing.sha256Fingerprint] = !fingerprintToShowPrivateKey[editing.sha256Fingerprint]" :icon="fingerprintToShowPrivateKey[editing.sha256Fingerprint] ? mdiEyeOff : mdiEye" variant="text"></v-btn>
-            <v-btn @click="downloadText(`${editing.name}-priv.pem`, editing.privateKey)" :icon="mdiDownload" color="orange" variant="text"></v-btn>
+            <ReusePrivateKeyAppendInner/>
           </template>
         </v-text-field>
 
@@ -56,6 +57,10 @@ import {
   updateAuthKeySet
 } from "@/authKeySets";
 import {ref, watch} from "vue";
+import { createReusableTemplate } from '@vueuse/core';
+import CopyToClipboardButton from "@/components/CopyToClipboardButton.vue"
+
+const [DefinePrivateKeyAppendInner, ReusePrivateKeyAppendInner] = createReusableTemplate();
 
 const expandedIndex = ref<number>();
 const editingStoredAuthKeySets = ref<StoredAuthKeySet[]>([]);

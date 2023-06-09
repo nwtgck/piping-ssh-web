@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/nwtgck/piping-ssh-web#readme",
   "dependencies": {
+    "@vueuse/core": "^10.1.2",
     "clipboard-copy": "^4.0.1",
     "comlink": "^4.4.1",
     "core-js": "^3.8.3",
