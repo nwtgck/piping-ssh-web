@@ -67,6 +67,7 @@ import {
 import {ref, watch} from "vue";
 import { createReusableTemplate } from '@vueuse/core';
 import CopyToClipboardButton from "@/components/CopyToClipboardButton.vue"
+import {showPrompt} from "@/components/Globals/prompt/global-prompt";
 
 const [DefinePrivateKeyAppendInner, ReusePrivateKeyAppendInner] = createReusableTemplate();
 
@@ -88,9 +89,16 @@ function keySetChanged(editing: StoredAuthKeySet): boolean {
   return editing.name !== source.name || editing.enabled !== source.enabled || editing.storeType !== source.storeType;
 }
 
-function removeKeys(sha256Fingerprint: string) {
+async function removeKeys(sha256Fingerprint: string) {
+  const answer: string | undefined = await showPrompt({
+    title: "Remove key?",
+    message: `Are you sure to remove the key?`,
+    showsInput: false,
+  });
+  if (answer === undefined) {
+    return;
+  }
   expandedIndex.value = undefined;
-  // TODO: confirm deletion OR undo feature
   removeAuthKeySet(sha256Fingerprint);
 }
 

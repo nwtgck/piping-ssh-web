@@ -7,6 +7,7 @@
         <v-card-text>
           <pre style="white-space: pre-wrap; margin-bottom: 1rem;">{{ globalPromptStore.message }}</pre>
           <v-text-field v-model="inputText"
+                        v-show="globalPromptStore.showsInput"
                         @keydown.enter="ok()"
                         :placeholder="globalPromptStore.placeholder"
                         :type="globalPromptStore.inputType"
