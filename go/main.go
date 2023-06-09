@@ -68,9 +68,10 @@ func jsDoSsh(this js.Value, args []js.Value) any {
 	jsFunctions := args[1]
 	return jsutil.NewPromise(func() (any, error) {
 		jsTransport := jsParams.Get("transport")
-		jsReader := jsTransport.Get("readable").Call("getReader")
-		jsWriter := jsTransport.Get("writable").Call("getWriter")
-		conn := NewTransportConn(jsReader, jsWriter)
+		jsReadable := jsTransport.Get("readable")
+		jsWritable := jsTransport.Get("writable")
+		conn := NewTransportConn(jsReadable, jsWritable)
+		defer conn.Close()
 		termBytesCh := make(chan []byte)
 		jsTermReadable := jsParams.Get("termReadable")
 		go func() {
@@ -82,6 +83,7 @@ func jsDoSsh(this js.Value, args []js.Value) any {
 					panic(err)
 				}
 				if jsResult.Get("done").Bool() {
+					close(termBytesCh)
 					break
 				}
 				termBytesCh <- []byte(jsResult.Get("value").String())

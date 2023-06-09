@@ -136,6 +136,7 @@ func DoSsh(conn net.Conn, term *Term, options *SSHOptions) error {
 	if err != nil {
 		return err
 	}
+	defer sshConn.Close()
 	options.OnConnected()
 	client := ssh.NewClient(sshConn, chans, reqs)
 	if err != nil {

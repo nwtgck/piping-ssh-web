@@ -10,6 +10,9 @@ import (
 )
 
 type TransportConn struct {
+	jsReadable js.Value
+	jsWritable js.Value
+
 	jsReader           js.Value
 	readBuffer         bytes.Buffer
 	underlyingReadDone bool
@@ -17,8 +20,10 @@ type TransportConn struct {
 	jsWriter js.Value
 }
 
-func NewTransportConn(jsReader js.Value, jsWriter js.Value) net.Conn {
-	return &TransportConn{jsReader: jsReader, jsWriter: jsWriter}
+func NewTransportConn(jsReadable js.Value, jsWritable js.Value) net.Conn {
+	jsReader := jsReadable.Call("getReader")
+	jsWriter := jsWritable.Call("getWriter")
+	return &TransportConn{jsReadable: jsReadable, jsWritable: jsWritable, jsReader: jsReader, jsWriter: jsWriter}
 }
 
 func (d *TransportConn) Read(p []byte) (int, error) {
