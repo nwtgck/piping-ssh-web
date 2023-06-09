@@ -4,10 +4,10 @@
       <template v-slot:title>
         <v-icon :icon="mdiKey" style="margin-right: 1rem;" :color="editing.enabled ? '' : 'grey'"/>
         <div :class="{'text-grey': !editing.enabled, 'font-italic': keySetChanged(editing)}">
-          {{ editing.name }}
+          <div style="margin-bottom: 0.5rem;">{{ editing.name }}</div>
+          <div style="font-size: 0.8rem;">{{editing.sha256Fingerprint}}</div>
         </div>
       </template>
-      <!-- TODO: show fingerprint -->
       <!-- TODO: show added_at -->
       <!-- TODO: show last_used_at -->
       <v-expansion-panel-text>
@@ -16,6 +16,7 @@
         <v-radio-group label="Store type" v-model="editing.storeType" inline>
           <v-radio v-for="t in authKeysStoreTypes" :id="t" :label="strings?.store_type(t) ?? ''" :value="t"/>
         </v-radio-group>
+        <!-- NOTE: Should not make public key and private key updatable because keys are identified by fingerprint. -->
         <v-btn color="secondary" @click="updateAuthKeySet(editing)" :disabled="!keySetChanged(editing)" style="margin-bottom: 2rem;">Update</v-btn>
         <v-textarea label="public key" :model-value="editing.publicKey" :readonly="true" variant="solo-filled">
           <template v-slot:append-inner>
