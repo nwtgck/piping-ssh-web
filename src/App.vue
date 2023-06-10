@@ -106,14 +106,14 @@
         </v-card-title>
         <v-divider></v-divider>
         <v-card-text style="min-height: 70vh;">
-          <v-row justify="end" class="ma-1">
-            <v-col cols="2">
-              <v-btn @click="newKeyDialog = !newKeyDialog" :prepend-icon="mdiPlus" color="secondary">New</v-btn>
-            </v-col>
-            <v-col cols="3">
-              <v-btn @click="generateKeyDialog = !generateKeyDialog" :prepend-icon="mdiAutoFix" color="secondary">Generate</v-btn>
-            </v-col>
-          </v-row>
+          <div style="text-align: end">
+            <v-btn @click="newKeyDialog = !newKeyDialog" :prepend-icon="mdiPlus" color="secondary" style="margin-right: 1rem;">
+              New
+            </v-btn>
+            <v-btn @click="generateKeyDialog = !generateKeyDialog" :prepend-icon="mdiAutoFix" color="secondary">
+              Generate
+            </v-btn>
+          </div>
           <KeyManager />
         </v-card-text>
       </v-card>
