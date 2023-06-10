@@ -23,18 +23,28 @@
       <v-container v-if="!connecting">
         <v-row>
           <v-col>
+            <v-sheet v-if="!supportsRequestStreams">
+              <v-alert color="warning" :icon="mdiAlertCircle" variant="outlined" prominent border="top" style="margin-bottom: 2rem;">
+                <template v-slot:text>
+                  Sorry, this browser is not supported.<br>
+                  Use Google Chrome 105 or higher.<br>
+                  You can also use Microsoft Edge or other Chromium-based browsers.
+                </template>
+              </v-alert>
+            </v-sheet>
+
             <v-sheet min-height="70vh" rounded="lg" style="padding: 1rem">
               <v-form @submit.prevent="connect" v-model="formValid">
-                <v-combobox label="Piping Server" v-model="pipingServerUrl" :items="pipingServerUrls" required variant="solo-filled" :rules="createRequiredRules('Piping Server')"></v-combobox>
+                <v-combobox label="Piping Server" v-model="pipingServerUrl" :items="pipingServerUrls" required variant="solo-filled" :rules="createRequiredRules('Piping Server')" :disabled="!supportsRequestStreams"></v-combobox>
                 <v-row>
                   <v-col>
-                    <v-text-field label="client-server path" v-model="csPath" required variant="solo-filled" :rules="createRequiredRules('client-server path')"></v-text-field>
+                    <v-text-field label="client-server path" v-model="csPath" required variant="solo-filled" :rules="createRequiredRules('client-server path')" :disabled="!supportsRequestStreams"></v-text-field>
                   </v-col>
                   <v-col>
-                    <v-text-field label="server-client path" v-model="scPath" required variant="solo-filled" :rules="createRequiredRules('server-client path')"></v-text-field>
+                    <v-text-field label="server-client path" v-model="scPath" required variant="solo-filled" :rules="createRequiredRules('server-client path')" :disabled="!supportsRequestStreams"></v-text-field>
                   </v-col>
                 </v-row>
-                <v-text-field label="user name" v-model="username" required variant="solo-filled" :rules="createRequiredRules('user name')"></v-text-field>
+                <v-text-field label="user name" v-model="username" required variant="solo-filled" :rules="createRequiredRules('user name')" :disabled="!supportsRequestStreams"></v-text-field>
 
                 <template v-if="showsMoreOptions">
                   <!-- HTTP header inputs -->
@@ -64,7 +74,9 @@
                   <v-checkbox v-model="autoConnectForFragmentParams" label="Auto connect for configured URL"></v-checkbox>
                 </template>
 
-                <v-btn type="submit" :disabled="!formValid" block class="mt-8" color="secondary">Connect</v-btn>
+                <v-btn type="submit" :disabled="!formValid || !supportsRequestStreams" block class="mt-8" color="secondary">
+                  Connect
+                </v-btn>
 
                 <v-btn @click="showsMoreOptions = !showsMoreOptions" :prepend-icon="showsMoreOptions ? mdiCollapseAll : mdiExpandAll" variant="text" style="margin-top: 1.2rem; text-transform: none">
                   {{ showsMoreOptions ? "Hide options" : "More options" }}
@@ -151,20 +163,24 @@
 </template>
 
 <script setup lang="ts">
-// TODO: detect fetch() feature
 import {computed, onMounted, ref, defineAsyncComponent, watch} from "vue";
 import {fragmentParams, getConfiguredUrl} from "@/fragment-params";
-import {mdiConsoleLine, mdiKey, mdiPlus, mdiAutoFix, mdiGithub, mdiClose, mdiFire, mdiCollapseAll, mdiExpandAll, mdiMinus, mdiEyeOff, mdiEye} from "@mdi/js";
+import {mdiConsoleLine, mdiKey, mdiPlus, mdiAutoFix, mdiGithub, mdiClose, mdiFire, mdiCollapseAll, mdiExpandAll, mdiMinus, mdiEyeOff, mdiEye, mdiAlertCircle} from "@mdi/js";
 import {AuthKeySet, storeAuthKeySet} from "@/authKeySets";
 import {getServerHostCommand} from "@/getServerHostCommand";
 import CopyToClipboardButton from "@/components/CopyToClipboardButton.vue";
 import {createRequiredRules} from "@/createRequiredRules";
 import DialogsForGlobal from "@/components/Globals/Globals.vue";
 import {showSnackbar} from "@/components/Globals/snackbar/global-snackbar";
+import {supportsRequestStreamsPromise} from "@/supportsRequestStreamsPromise";
 const PipingSsh = defineAsyncComponent(() => import("@/components/PipingSsh.vue"));
 const KeyManager = defineAsyncComponent(() => import("@/components/KeyManager.vue"));
 const KeysEditor = defineAsyncComponent(() => import("@/components/KeysEditor.vue"));
 const KeyGenerator = defineAsyncComponent(() => import("@/components/KeyGenerator.vue"));
+
+
+const supportsRequestStreams = ref(true /* There are many Chromium-based browser users for now */);
+supportsRequestStreamsPromise.then(supports => supportsRequestStreams.value = supports);
 
 const pipingServerUrl = ref<string>(fragmentParams.pipingServerUrl() ?? "https://ppng.io");
 const pipingServerUrls = ref<string[]>([
