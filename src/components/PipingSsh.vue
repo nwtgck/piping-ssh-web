@@ -58,6 +58,7 @@ const canceled = ref(false);
 
 const serverHostCommand = ref(getServerHostCommand({
   pipingServerUrl: props.pipingServerUrl,
+  pipingServerHeaders: props.pipingServerHeaders,
   csPath: props.csPath,
   scPath: props.scPath,
   sshServerPort: fragmentParams.sshServerPortForHint() ?? 22,

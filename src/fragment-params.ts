@@ -77,7 +77,7 @@ export function getConfiguredUrl({ pipingServerUrl, pipingServerHeaders, csPath,
   if (sshPassword !== undefined) {
     searchParams.set(paramNames.sshPassword, sshPassword);
   }
-  if (sshServerPortForHint !== undefined) {
+  if (sshServerPortForHint !== undefined && sshServerPortForHint !== "") {
     searchParams.set(paramNames.sshServerPortForHint, sshServerPortForHint);
   }
   if (autoConnect !== undefined && autoConnect) {

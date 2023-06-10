@@ -193,6 +193,7 @@ const serverHostCommand = computed<string>(() => {
   return getServerHostCommand({
     // NOTE: v-combobox makes pipingServerUrl null
     pipingServerUrl: pipingServerUrl.value ?? "",
+    pipingServerHeaders: cleanPipingServerHeaders.value,
     csPath: csPath.value,
     scPath: scPath.value,
     sshServerPort: sshServerPortForCommandHint.value,
