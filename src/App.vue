@@ -36,7 +36,34 @@
                 </v-row>
                 <v-text-field label="user name" v-model="username" required variant="solo-filled" :rules="createRequiredRules('user name')"></v-text-field>
 
+                <template v-if="showsMoreOptions">
+                  <!-- HTTP header inputs -->
+                  <v-row v-for="(header, idx) in pipingServerHeaders">
+                    <v-col>
+                      <v-text-field v-model="header[0]" :label="`HTTP header name ${idx + 1}`" variant="solo-filled"></v-text-field>
+                    </v-col>
+                    <v-col>
+                      <v-text-field v-model="header[1]" :label="`HTTP header value ${idx + 1}`" variant="solo-filled"></v-text-field>
+                    </v-col>
+                    <v-col>
+                      <v-btn :icon="mdiMinus" @click="pipingServerHeaders.splice(idx, 1)" variant="text"></v-btn>
+                    </v-col>
+                  </v-row>
+                  <v-btn @click="pipingServerHeaders.push(['', ''])" :prepend-icon="mdiPlus" variant="outlined" style="margin-bottom: 1rem; text-transform: none">
+                    Add header
+                  </v-btn>
+
+                  <v-text-field v-model="sshServerPortForCommandHint" label="SSH server port for command" variant="solo-filled"></v-text-field>
+                  <v-text-field v-model="sshPassword" label="SSH password" type="password" variant="solo-filled"></v-text-field>
+                  <v-checkbox v-model="includesSshPasswordInFragmentParams" label="Include SSH password in configured URL"></v-checkbox>
+                  <v-checkbox v-model="autoConnectForFragmentParams" label="Auto connect for configured URL"></v-checkbox>
+                </template>
+
                 <v-btn type="submit" :disabled="!formValid" block class="mt-8" color="secondary">Connect</v-btn>
+
+                <v-btn @click="showsMoreOptions = !showsMoreOptions" :prepend-icon="showsMoreOptions ? mdiCollapseAll : mdiExpandAll" variant="text" style="margin-top: 1.2rem; text-transform: none">
+                  {{ showsMoreOptions ? "Hide options" : "More options" }}
+                </v-btn>
               </v-form>
 
               <v-spacer style="margin-top: 4rem;"/>
@@ -46,7 +73,7 @@
                 </template>
               </v-textarea>
 
-              <v-btn color="grey" @click="setConfiguredUrl()" :prepend-icon="mdiFire">
+              <v-btn color="grey" @click="setConfiguredUrl()" :prepend-icon="mdiFire" variant="outlined" style="text-transform: none">
                 Set configured URL
               </v-btn>
             </v-sheet>
@@ -54,7 +81,7 @@
         </v-row>
       </v-container>
 
-      <PipingSsh v-if="connecting" :piping-server-url="pipingServerUrl" :cs-path="csPath" :sc-path="scPath" :username="username" @end="connecting = false"/>
+      <PipingSsh v-if="connecting" :piping-server-url="pipingServerUrl" :piping-server-headers="cleanPipingServerHeaders" :default-ssh-password="sshPassword" :cs-path="csPath" :sc-path="scPath" :username="username" @end="connecting = false"/>
     </v-main>
 
     <v-dialog v-model="keyManagerDialog" scrollable width="90vw">
@@ -114,7 +141,7 @@
 // TODO: detect fetch() feature
 import {computed, onMounted, ref, defineAsyncComponent, watch} from "vue";
 import {fragmentParams, getConfiguredUrl} from "@/fragment-params";
-import {mdiConsoleLine, mdiKey, mdiPlus, mdiAutoFix, mdiGithub, mdiClose, mdiFire} from "@mdi/js";
+import {mdiConsoleLine, mdiKey, mdiPlus, mdiAutoFix, mdiGithub, mdiClose, mdiFire, mdiCollapseAll, mdiExpandAll, mdiMinus} from "@mdi/js";
 import {AuthKeySet, storeAuthKeySet} from "@/authKeySets";
 import {getServerHostCommand} from "@/getServerHostCommand";
 import CopyToClipboardButton from "@/components/CopyToClipboardButton.vue";
@@ -131,10 +158,17 @@ const pipingServerUrls = ref<string[]>([
   "https://ppng.io",
   "https://piping.nwtgck.repl.co",
 ]);
-
+const pipingServerHeaders = ref<Array<[string, string]>>(fragmentParams.pipingServerHeaders() ?? []);
+const cleanPipingServerHeaders = computed<Array<[string, string]>>(() => {
+  return pipingServerHeaders.value.filter((field) => field[0] !== "");
+});
 const csPath = ref<string>(fragmentParams.csPath() ?? randomString(4));
 const scPath = ref<string>(fragmentParams.scPath() ?? randomString(4));
 const username = ref<string>(fragmentParams.sshUsername() ?? "");
+const sshServerPortForCommandHint = ref<string>(fragmentParams.sshServerPortForHint() ?? "22");
+const sshPassword = ref<string | undefined>(fragmentParams.sshPassword());
+const includesSshPasswordInFragmentParams = ref<boolean>(fragmentParams.sshPassword() !== undefined);
+const autoConnectForFragmentParams = ref<boolean>(fragmentParams.autoConnect() ?? false);
 
 const formValid = ref(false);
 const connecting = ref<boolean>(false);
@@ -143,6 +177,7 @@ function connect() {
   connecting.value = true;
 }
 
+const showsMoreOptions = ref(false);
 const keyManagerDialog = ref(false);
 const newKeyDialog = ref(false);
 const generateKeyDialog = ref(false);
@@ -160,7 +195,7 @@ const serverHostCommand = computed<string>(() => {
     pipingServerUrl: pipingServerUrl.value ?? "",
     csPath: csPath.value,
     scPath: scPath.value,
-    sshServerPort: fragmentParams.sshServerPortForHint() ?? 22,
+    sshServerPort: sshServerPortForCommandHint.value,
   });
 });
 watch(serverHostCommand, () => {
@@ -184,13 +219,13 @@ function randomString(len){
 function setConfiguredUrl() {
   location.href = getConfiguredUrl({
     pipingServerUrl: pipingServerUrl.value,
-    pipingServerHeaders: undefined,
+    pipingServerHeaders: cleanPipingServerHeaders.value,
     csPath: csPath.value,
     scPath: scPath.value,
     sshUsername: username.value,
-    sshPassword: undefined,
-    sshServerPortForHint: "22",
-    autoConnect: undefined,
+    sshPassword: includesSshPasswordInFragmentParams.value ? sshPassword.value : undefined,
+    sshServerPortForHint: sshServerPortForCommandHint.value,
+    autoConnect: autoConnectForFragmentParams.value,
   });
   showSnackbar({
     message: "URL updated",

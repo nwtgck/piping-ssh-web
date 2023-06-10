@@ -36,9 +36,11 @@ import {showSnackbar} from "@/components/Globals/snackbar/global-snackbar";
 
 const props = defineProps<{
   pipingServerUrl: string,
+  pipingServerHeaders: Array<[string, string]>,
   csPath: string,
   scPath: string,
   username: string,
+  defaultSshPassword: string | undefined,
 }>();
 
 const emit = defineEmits<{
@@ -131,7 +133,7 @@ async function start() {
   const {readable: sendReadable, writable: sendWritable} = new TransformStream();
   const csUrl = urlJoin(props.pipingServerUrl, props.csPath);
   const scUrl = urlJoin(props.pipingServerUrl, props.scPath);
-  const pipingServerHeaders = new Headers(fragmentParams.pipingServerHeaders() ?? []);
+  const pipingServerHeaders = new Headers(props.pipingServerHeaders);
   // TODO: retry connection
   fetch(csUrl, {
     method: "POST",
@@ -191,9 +193,9 @@ async function start() {
         term.write(data);
       },
       async onPasswordAuth(): Promise<string> {
-        const passwordInFragment = fragmentParams.sshPassword();
-        if (!passwordTried && passwordInFragment !== undefined) {
-          return passwordInFragment
+        if (!passwordTried && props.defaultSshPassword !== undefined) {
+          passwordTried = true;
+          return props.defaultSshPassword;
         }
         const message = passwordTried ? "try again." : "";
         const password: string | undefined = await showPrompt({

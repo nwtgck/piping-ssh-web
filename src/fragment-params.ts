@@ -62,7 +62,7 @@ export function getConfiguredUrl({ pipingServerUrl, pipingServerHeaders, csPath,
   if (pipingServerUrl !== undefined) {
     searchParams.set(paramNames.pipingServerUrl, pipingServerUrl);
   }
-  if (pipingServerHeaders !== undefined) {
+  if (pipingServerHeaders !== undefined && pipingServerHeaders.length !== 0) {
     searchParams.set(paramNames.pipingServerHeaders, JSON.stringify(pipingServerHeaders));
   }
   if (csPath !== undefined) {
@@ -80,8 +80,8 @@ export function getConfiguredUrl({ pipingServerUrl, pipingServerHeaders, csPath,
   if (sshServerPortForHint !== undefined) {
     searchParams.set(paramNames.sshServerPortForHint, sshServerPortForHint);
   }
-  if (autoConnect !== undefined) {
-    searchParams.set(paramNames.autoConnect, autoConnect ? "1" : "0");
+  if (autoConnect !== undefined && autoConnect) {
+    searchParams.set(paramNames.autoConnect, "1");
   }
   const url = new URL(location.href);
   url.hash = `?${searchParams.toString()}`
