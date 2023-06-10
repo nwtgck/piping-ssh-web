@@ -38,7 +38,7 @@
 
                 <template v-if="showsMoreOptions">
                   <!-- HTTP header inputs -->
-                  <v-row v-for="(header, idx) in pipingServerHeaders">
+                  <v-row v-for="(header, idx) in editingPipingServerHeaders">
                     <v-col>
                       <v-text-field v-model="header[0]" :label="`HTTP header name ${idx + 1}`" variant="solo-filled"></v-text-field>
                     </v-col>
@@ -46,10 +46,10 @@
                       <v-text-field v-model="header[1]" :label="`HTTP header value ${idx + 1}`" variant="solo-filled"></v-text-field>
                     </v-col>
                     <v-col>
-                      <v-btn :icon="mdiMinus" @click="pipingServerHeaders.splice(idx, 1)" variant="text"></v-btn>
+                      <v-btn :icon="mdiMinus" @click="editingPipingServerHeaders.splice(idx, 1)" variant="text"></v-btn>
                     </v-col>
                   </v-row>
-                  <v-btn @click="pipingServerHeaders.push(['', ''])" :prepend-icon="mdiPlus" variant="outlined" style="margin-bottom: 1rem; text-transform: none">
+                  <v-btn @click="editingPipingServerHeaders.push(['', ''])" :prepend-icon="mdiPlus" variant="outlined" style="margin-bottom: 1rem; text-transform: none">
                     Add header
                   </v-btn>
 
@@ -85,7 +85,7 @@
       {{ editingSshPassword }}
       <PipingSsh v-if="connecting"
                  :piping-server-url="pipingServerUrl"
-                 :piping-server-headers="cleanPipingServerHeaders"
+                 :piping-server-headers="pipingServerHeaders"
                  :default-ssh-password="sshPassword"
                  :cs-path="csPath"
                  :sc-path="scPath"
@@ -168,9 +168,9 @@ const pipingServerUrls = ref<string[]>([
   "https://ppng.io",
   "https://piping.nwtgck.repl.co",
 ]);
-const pipingServerHeaders = ref<Array<[string, string]>>(fragmentParams.pipingServerHeaders() ?? []);
-const cleanPipingServerHeaders = computed<Array<[string, string]>>(() => {
-  return pipingServerHeaders.value.filter((field) => field[0] !== "");
+const editingPipingServerHeaders = ref<Array<[string, string]>>(fragmentParams.pipingServerHeaders() ?? []);
+const pipingServerHeaders = computed<Array<[string, string]>>(() => {
+  return editingPipingServerHeaders.value.filter(([name,value]) => name !== "");
 });
 const csPath = ref<string>(fragmentParams.csPath() ?? randomString(4));
 const scPath = ref<string>(fragmentParams.scPath() ?? randomString(4));
@@ -212,7 +212,7 @@ const serverHostCommand = computed<string>(() => {
   return getServerHostCommand({
     // NOTE: v-combobox makes pipingServerUrl null
     pipingServerUrl: pipingServerUrl.value ?? "",
-    pipingServerHeaders: cleanPipingServerHeaders.value,
+    pipingServerHeaders: pipingServerHeaders.value,
     csPath: csPath.value,
     scPath: scPath.value,
     sshServerPort: sshServerPortForCommandHint.value,
@@ -239,7 +239,7 @@ function randomString(len){
 function setConfiguredUrl() {
   location.href = getConfiguredUrl({
     pipingServerUrl: pipingServerUrl.value,
-    pipingServerHeaders: cleanPipingServerHeaders.value,
+    pipingServerHeaders: pipingServerHeaders.value,
     csPath: csPath.value,
     scPath: scPath.value,
     sshUsername: username.value,
