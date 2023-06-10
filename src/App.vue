@@ -54,7 +54,8 @@
                   </v-btn>
 
                   <v-text-field v-model="sshServerPortForCommandHint" label="SSH server port for command" variant="solo-filled"></v-text-field>
-                  <v-text-field v-model="sshPassword" label="SSH password" type="password" variant="solo-filled"></v-text-field>
+                  <v-text-field v-model="editingSshPassword" label="SSH password" type="password" variant="solo-filled"></v-text-field>
+                  <v-checkbox v-model="emptySshPassword" label="Empty SSH password"></v-checkbox>
                   <v-checkbox v-model="includesSshPasswordInFragmentParams" label="Include SSH password in configured URL"></v-checkbox>
                   <v-checkbox v-model="autoConnectForFragmentParams" label="Auto connect for configured URL"></v-checkbox>
                 </template>
@@ -81,7 +82,16 @@
         </v-row>
       </v-container>
 
-      <PipingSsh v-if="connecting" :piping-server-url="pipingServerUrl" :piping-server-headers="cleanPipingServerHeaders" :default-ssh-password="sshPassword" :cs-path="csPath" :sc-path="scPath" :username="username" @end="connecting = false"/>
+      {{ editingSshPassword }}
+      <PipingSsh v-if="connecting"
+                 :piping-server-url="pipingServerUrl"
+                 :piping-server-headers="cleanPipingServerHeaders"
+                 :default-ssh-password="sshPassword"
+                 :cs-path="csPath"
+                 :sc-path="scPath"
+                 :username="username"
+                 @end="connecting = false"
+      />
     </v-main>
 
     <v-dialog v-model="keyManagerDialog" scrollable width="90vw">
@@ -166,7 +176,16 @@ const csPath = ref<string>(fragmentParams.csPath() ?? randomString(4));
 const scPath = ref<string>(fragmentParams.scPath() ?? randomString(4));
 const username = ref<string>(fragmentParams.sshUsername() ?? "");
 const sshServerPortForCommandHint = ref<string>(fragmentParams.sshServerPortForHint() ?? "22");
-const sshPassword = ref<string | undefined>(fragmentParams.sshPassword());
+
+const editingSshPassword = ref<string>(fragmentParams.sshPassword() ?? "");
+const emptySshPassword = ref<boolean>(fragmentParams.sshPassword() === "");
+const sshPassword = computed<string | undefined>(() => {
+  if (editingSshPassword.value === "" && !emptySshPassword.value) {
+    return undefined;
+  }
+  return editingSshPassword.value;
+});
+
 const includesSshPasswordInFragmentParams = ref<boolean>(fragmentParams.sshPassword() !== undefined);
 const autoConnectForFragmentParams = ref<boolean>(fragmentParams.autoConnect() ?? false);
 

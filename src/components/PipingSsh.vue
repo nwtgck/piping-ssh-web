@@ -194,6 +194,7 @@ async function start() {
         term.write(data);
       },
       async onPasswordAuth(): Promise<string> {
+        // NOTE: Keep support empty password
         if (!passwordTried && props.defaultSshPassword !== undefined) {
           passwordTried = true;
           return props.defaultSshPassword;
