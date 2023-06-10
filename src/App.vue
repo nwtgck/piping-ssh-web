@@ -54,7 +54,11 @@
                   </v-btn>
 
                   <v-text-field v-model="sshServerPortForCommandHint" label="SSH server port for command" variant="solo-filled"></v-text-field>
-                  <v-text-field v-model="editingSshPassword" label="SSH password" type="password" variant="solo-filled"></v-text-field>
+                  <v-text-field v-model="editingSshPassword" label="SSH password" :type="showsSshPassword ? 'text' : 'password'" variant="solo-filled">
+                    <template v-slot:append-inner>
+                      <v-btn @click="showsSshPassword = !showsSshPassword" :icon="showsSshPassword ? mdiEyeOff : mdiEye" variant="text"></v-btn>
+                    </template>
+                  </v-text-field>
                   <v-checkbox v-model="emptySshPassword" label="Empty SSH password"></v-checkbox>
                   <v-checkbox v-model="includesSshPasswordInFragmentParams" label="Include SSH password in configured URL"></v-checkbox>
                   <v-checkbox v-model="autoConnectForFragmentParams" label="Auto connect for configured URL"></v-checkbox>
@@ -82,7 +86,6 @@
         </v-row>
       </v-container>
 
-      {{ editingSshPassword }}
       <PipingSsh v-if="connecting"
                  :piping-server-url="pipingServerUrl"
                  :piping-server-headers="pipingServerHeaders"
@@ -151,7 +154,7 @@
 // TODO: detect fetch() feature
 import {computed, onMounted, ref, defineAsyncComponent, watch} from "vue";
 import {fragmentParams, getConfiguredUrl} from "@/fragment-params";
-import {mdiConsoleLine, mdiKey, mdiPlus, mdiAutoFix, mdiGithub, mdiClose, mdiFire, mdiCollapseAll, mdiExpandAll, mdiMinus} from "@mdi/js";
+import {mdiConsoleLine, mdiKey, mdiPlus, mdiAutoFix, mdiGithub, mdiClose, mdiFire, mdiCollapseAll, mdiExpandAll, mdiMinus, mdiEyeOff, mdiEye} from "@mdi/js";
 import {AuthKeySet, storeAuthKeySet} from "@/authKeySets";
 import {getServerHostCommand} from "@/getServerHostCommand";
 import CopyToClipboardButton from "@/components/CopyToClipboardButton.vue";
@@ -178,6 +181,7 @@ const username = ref<string>(fragmentParams.sshUsername() ?? "");
 const sshServerPortForCommandHint = ref<string>(fragmentParams.sshServerPortForHint() ?? "22");
 
 const editingSshPassword = ref<string>(fragmentParams.sshPassword() ?? "");
+const showsSshPassword = ref(false);
 const emptySshPassword = ref<boolean>(fragmentParams.sshPassword() === "");
 const sshPassword = computed<string | undefined>(() => {
   if (editingSshPassword.value === "" && !emptySshPassword.value) {
