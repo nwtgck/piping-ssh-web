@@ -118,7 +118,7 @@
         </v-card-title>
         <v-divider></v-divider>
         <v-card-text style="min-height: 70vh;">
-          <div style="text-align: end">
+          <div style="text-align: end; margin-bottom: 1rem;">
             <v-btn @click="newKeyDialog = !newKeyDialog" :prepend-icon="mdiPlus" color="secondary" style="margin-right: 1rem;">
               New
             </v-btn>
