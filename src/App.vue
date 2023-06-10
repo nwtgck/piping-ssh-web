@@ -46,7 +46,9 @@
                 </template>
               </v-textarea>
 
-              <!-- TODO: burn setting to fragment parameter -->
+              <v-btn color="grey" @click="setConfiguredUrl()" :prepend-icon="mdiFire">
+                Set configured URL
+              </v-btn>
             </v-sheet>
           </v-col>
         </v-row>
@@ -111,13 +113,14 @@
 <script setup lang="ts">
 // TODO: detect fetch() feature
 import {computed, onMounted, ref, defineAsyncComponent, watch} from "vue";
-import {fragmentParams} from "@/fragment-params";
-import { mdiConsoleLine, mdiKey, mdiPlus, mdiAutoFix, mdiGithub, mdiClose } from "@mdi/js";
+import {fragmentParams, getConfiguredUrl} from "@/fragment-params";
+import {mdiConsoleLine, mdiKey, mdiPlus, mdiAutoFix, mdiGithub, mdiClose, mdiFire} from "@mdi/js";
 import {AuthKeySet, storeAuthKeySet} from "@/authKeySets";
 import {getServerHostCommand} from "@/getServerHostCommand";
 import CopyToClipboardButton from "@/components/CopyToClipboardButton.vue";
 import {createRequiredRules} from "@/createRequiredRules";
 import DialogsForGlobal from "@/components/Globals/Globals.vue";
+import {showSnackbar} from "@/components/Globals/snackbar/global-snackbar";
 const PipingSsh = defineAsyncComponent(() => import("@/components/PipingSsh.vue"));
 const KeyManager = defineAsyncComponent(() => import("@/components/KeyManager.vue"));
 const KeysEditor = defineAsyncComponent(() => import("@/components/KeysEditor.vue"));
@@ -176,6 +179,22 @@ function randomString(len){
   const nonConfusingChars = ["a", "b", "c", "d", "e", "f", "h", "i", "j", "k", "m", "n", "p", "r", "s", "t", "u", "v", "w", "x", "y", "z", "2", "3", "4", "5", "6", "7", "8"];
   const randomArr = window.crypto.getRandomValues(new Uint32Array(len));
   return Array.from(randomArr).map(n => nonConfusingChars[n % nonConfusingChars.length]).join('');
+}
+
+function setConfiguredUrl() {
+  location.href = getConfiguredUrl({
+    pipingServerUrl: pipingServerUrl.value,
+    pipingServerHeaders: undefined,
+    csPath: csPath.value,
+    scPath: scPath.value,
+    sshUsername: username.value,
+    sshPassword: undefined,
+    sshServerPortForHint: "22",
+    autoConnect: undefined,
+  });
+  showSnackbar({
+    message: "URL updated",
+  });
 }
 </script>
 
