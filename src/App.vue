@@ -25,7 +25,7 @@
           <v-col>
             <v-sheet min-height="70vh" rounded="lg" style="padding: 1rem">
               <v-form @submit.prevent="connect" v-model="formValid">
-                <v-text-field label="Piping Server" v-model="pipingServerUrl" required variant="solo-filled" :rules="createRequiredRules('Piping Server')"></v-text-field>
+                <v-combobox label="Piping Server" v-model="pipingServerUrl" :items="pipingServerUrls" required variant="solo-filled" :rules="createRequiredRules('Piping Server')"></v-combobox>
                 <v-row>
                   <v-col>
                     <v-text-field label="client-server path" v-model="csPath" required variant="solo-filled" :rules="createRequiredRules('client-server path')"></v-text-field>
@@ -124,6 +124,10 @@ const KeysEditor = defineAsyncComponent(() => import("@/components/KeysEditor.vu
 const KeyGenerator = defineAsyncComponent(() => import("@/components/KeyGenerator.vue"));
 
 const pipingServerUrl = ref<string>(fragmentParams.pipingServerUrl() ?? "https://ppng.io");
+const pipingServerUrls = ref<string[]>([
+  "https://ppng.io",
+  "https://piping.nwtgck.repl.co",
+]);
 
 const csPath = ref<string>(fragmentParams.csPath() ?? randomString(4));
 const scPath = ref<string>(fragmentParams.scPath() ?? randomString(4));
@@ -144,12 +148,13 @@ onMounted(() => {
   if (fragmentParams.autoConnect()) {
     connect();
   }
-})
+});
 
 const serverHostCommandEditing = ref<string>("");
 const serverHostCommand = computed<string>(() => {
   return getServerHostCommand({
-    pipingServerUrl: pipingServerUrl.value,
+    // NOTE: v-combobox makes pipingServerUrl null
+    pipingServerUrl: pipingServerUrl.value ?? "",
     csPath: csPath.value,
     scPath: scPath.value,
     sshServerPort: fragmentParams.sshServerPortForHint() ?? 22,
