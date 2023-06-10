@@ -1,7 +1,7 @@
 <template>
   <v-container v-if="!canceled && connectionState === 'connecting'">
     <v-row>
-      <v-col>
+      <v-col style="text-align: center">
         <v-progress-circular indeterminate color="secondary" :size="200" :width="2" style="margin-top: 3rem;">
           Connecting...
         </v-progress-circular>
