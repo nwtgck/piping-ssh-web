@@ -225,7 +225,15 @@ onMounted(() => {
   if (fragmentParams.autoConnect()) {
     connect();
   }
+  window.addEventListener('load', () => {
+    preloadForUserExperience();
+  });
 });
+
+function preloadForUserExperience() {
+  import("xterm");
+  import("xterm-addon-fit");
+}
 
 const serverHostCommandEditing = ref<string>("");
 const serverHostCommand = computed<string>(() => {
