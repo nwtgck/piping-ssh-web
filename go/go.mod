@@ -7,4 +7,9 @@ require (
 	golang.org/x/crypto v0.9.0
 )
 
+// Safety:
+// ./golang-crypto diretory is git@github.com:golang/crypto.git, which is Go official mirror.
+// All patch is written in ./golang-crypto.patch.
+replace golang.org/x/crypto => ./golang-crypto
+
 require golang.org/x/sys v0.8.0 // indirect

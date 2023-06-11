@@ -1,0 +1,13 @@
+diff --git a/ssh/handshake.go b/ssh/handshake.go
+index 07a1843..ffe7fd0 100644
+--- a/ssh/handshake.go
++++ b/ssh/handshake.go
+@@ -733,3 +733,8 @@ func (t *handshakeTransport) client(kex kexAlgorithm, magics *handshakeMagics) (
+ 
+ 	return result, nil
+ }
++
++// PublicWritePacket just exposes .writePacket() for disconnection
++func (t *handshakeTransport) PublicWritePacket(p []byte) error {
++	return t.writePacket(p)
++}
