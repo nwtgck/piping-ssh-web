@@ -6,9 +6,7 @@ import (
 	"golang.org/x/crypto/ssh"
 	"io"
 	"net"
-	"reflect"
 	"syscall/js"
-	"unsafe"
 )
 
 type TermWindow struct {
@@ -208,12 +206,6 @@ func DoSsh(conn net.Conn, term *Term, options *SSHOptions) error {
 
 // proposal: https://github.com/golang/go/issues/37913
 func sshDisconnect(sshConn ssh.Conn) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("disconnection error: %+v", r)
-		}
-	}()
-
 	// https://www.rfc-editor.org/rfc/rfc4253#section-12
 	const SSH_MSG_DISCONNECT = 1
 	// https://www.rfc-editor.org/rfc/rfc4253#section-11.1
@@ -224,17 +216,10 @@ func sshDisconnect(sshConn ssh.Conn) (err error) {
 	}
 	const SSH_DISCONNECT_BY_APPLICATION = 11
 
-	privateTransport := reflect.ValueOf(sshConn).Elem().FieldByName("transport")
-	transport := reflect.NewAt(privateTransport.Type(), unsafe.Pointer(privateTransport.UnsafeAddr())).Elem()
-	// See golang-crypto.patch
-	method := transport.MethodByName("PublicWritePacket")
 	p := append(
 		[]byte{SSH_MSG_DISCONNECT},
 		ssh.Marshal(disconnectMsg{Reason: SSH_DISCONNECT_BY_APPLICATION, Description: "Finished"})...,
 	)
-	errValue := method.Call([]reflect.Value{reflect.ValueOf(p)})
-	if !errValue[0].IsNil() {
-		err = errValue[0].Interface().(error)
-	}
-	return
+	// See golang-crypto.patch
+	return ssh.PublicWritePacket(sshConn, p)
 }

@@ -1,13 +1,12 @@
-diff --git a/ssh/handshake.go b/ssh/handshake.go
-index 07a1843..ffe7fd0 100644
---- a/ssh/handshake.go
-+++ b/ssh/handshake.go
-@@ -733,3 +733,8 @@ func (t *handshakeTransport) client(kex kexAlgorithm, magics *handshakeMagics) (
- 
- 	return result, nil
+diff --git a/ssh/connection.go b/ssh/connection.go
+index 8f345ee..7d7204b 100644
+--- a/ssh/connection.go
++++ b/ssh/connection.go
+@@ -141,3 +141,7 @@ func (c *sshConn) ClientVersion() []byte {
+ func (c *sshConn) ServerVersion() []byte {
+ 	return dup(c.serverVersion)
  }
 +
-+// PublicWritePacket just exposes .writePacket() for disconnection
-+func (t *handshakeTransport) PublicWritePacket(p []byte) error {
-+	return t.writePacket(p)
++func PublicWritePacket(conn Conn, p []byte) error {
++	return conn.(*connection).transport.writePacket(p)
 +}
