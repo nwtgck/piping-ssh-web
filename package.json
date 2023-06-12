@@ -1,42 +1,44 @@
 {
   "name": "piping-ssh-web",
   "version": "0.1.0-SNAPSHOT",
+  "private": true,
   "description": "SSH over HTTPS via Piping Server",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --mode production",
-    "serve": "webpack-cli serve --mode development"
+    "serve": "npm run patch-golang-crypto && concurrently -r 'vue-cli-service serve' 'npm run build-wasm-watch'",
+    "patch-golang-crypto": "(cd go/golang-crypto && patch -p1 -N < ../golang-crypto.patch || true)",
+    "build-wasm": "(cd go && GOOS=js GOARCH=wasm go build -o ../public/main.wasm) && gzip -9kf public/main.wasm && cp \"$(go env GOROOT)/misc/wasm/wasm_exec.js\" ./public",
+    "build-wasm-watch": "watch 'npm run build-wasm' go",
+    "build": "npm run patch-golang-crypto && npm run build-wasm && vue-cli-service build"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nwtgck/piping-ssh-web.git"
   },
   "author": "Ryo Ota <nwtgck@nwtgck.org> (https://github.com/nwtgck)",
-  "contributors": [
-    {
-      "name": "Stuart Brooks"
-    }
-  ],
   "license": "MIT",
-  "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-loader": "^9.1.2",
-    "babel-preset-es2015": "^6.24.1",
-    "copy-webpack-plugin": "^11.0.0",
-    "html-webpack-plugin": "^5.5.1",
-    "ts-loader": "^9.4.2",
-    "typescript": "^5.0.4",
-    "webpack": "^5.82.0",
-    "webpack-cli": "^5.0.2",
-    "webpack-dev-server": "^4.13.3"
-  },
   "bugs": {
     "url": "https://github.com/nwtgck/piping-ssh-web/issues"
   },
   "homepage": "https://github.com/nwtgck/piping-ssh-web#readme",
   "dependencies": {
+    "@vueuse/core": "^10.1.2",
+    "clipboard-copy": "^4.0.1",
+    "comlink": "^4.4.1",
+    "core-js": "^3.8.3",
     "url-join": "^5.0.0",
-    "xterm": "^4.19.0",
-    "xterm-addon-fit": "^0.5.0"
+    "vue": "^3.2.13",
+    "vuetify": "^3.3.2",
+    "xterm": "^5.1.0",
+    "xterm-addon-fit": "^0.7.0",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "@mdi/js": "^6.9.96",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-typescript": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "concurrently": "^8.0.1",
+    "typescript": "^5.1.3",
+    "watch": "^1.0.2"
   }
 }

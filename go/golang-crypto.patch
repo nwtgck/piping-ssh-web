@@ -1,0 +1,12 @@
+diff --git a/ssh/connection.go b/ssh/connection.go
+index 8f345ee..7d7204b 100644
+--- a/ssh/connection.go
++++ b/ssh/connection.go
+@@ -141,3 +141,7 @@ func (c *sshConn) ClientVersion() []byte {
+ func (c *sshConn) ServerVersion() []byte {
+ 	return dup(c.serverVersion)
+ }
++
++func PublicWritePacket(conn Conn, p []byte) error {
++	return conn.(*connection).transport.writePacket(p)
++}
