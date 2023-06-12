@@ -40,9 +40,23 @@ export type GoWasmExported = {
   sshPrivateKeyIsEncrypted(privateKey: string): boolean,
 };
 
-const go = new (globalThis as any).Go();
+const goPromise = (async () => {
+  if (typeof window === 'undefined') {
+    (globalThis as any).importScripts("../wasm_exec.js");
+  } else {
+    await new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "wasm_exec.js";
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+  return new (globalThis as any).Go();
+})();
 
 export const goWasmExportedPromise: Promise<GoWasmExported> = (async () => {
+  const go = await goPromise;
   const exportedPromise = new Promise<GoWasmExported>((resolve) => {
     (globalThis as any).pipingSshGoExportResolve = resolve;
   });
@@ -60,6 +74,7 @@ export const goWasmExportedPromise: Promise<GoWasmExported> = (async () => {
 })();
 
 
-export function goWasmExisted(): boolean {
+export async function goWasmExisted(): Promise<boolean> {
+  const go = await goPromise;
   return go.exited ?? false;
 }
