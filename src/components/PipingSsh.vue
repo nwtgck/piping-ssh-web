@@ -112,7 +112,7 @@ async function start() {
   const {Terminal} = await xtermPromise();
   const term = new Terminal({ cursorBlink: true });
   const fitAddon = new FitAddon();
-  const termResizeMessageChannel = new MessageChannel();
+  const messageChannel = new MessageChannel();
   term.loadAddon(fitAddon);
   term.open(terminal.value!);
   window.addEventListener('resize', () => {
@@ -124,7 +124,8 @@ async function start() {
     if (proposedDims === undefined) {
       return;
     }
-    termResizeMessageChannel.port1.postMessage({
+    messageChannel.port1.postMessage({
+      type: "resize",
       cols: proposedDims.cols,
       rows: proposedDims.rows,
     });
@@ -173,13 +174,18 @@ async function start() {
       });
     },
   });
+  window.addEventListener("beforeunload", () =>{
+    messageChannel.port1.postMessage({
+      type: "disconnect",
+    });
+  });
   try {
     let passwordTried = false;
     const transfers: Transferable[] = [
       transport.readable,
       transport.writable,
       termReadable,
-      termResizeMessageChannel.port2
+      messageChannel.port2
     ];
     await (await aliveGoWasmWorkerRemotePromise()).doSsh(Comlink.transfer({
       transport,
@@ -187,7 +193,7 @@ async function start() {
       initialRows: term.rows,
       initialCols: term.cols,
       username: props.username,
-      termResizeMessagePort: termResizeMessageChannel.port2,
+      messagePort: messageChannel.port2,
       authKeySets: await getAuthKeySetsForSsh(),
     }, transfers), Comlink.proxy({
       termWrite(data: Uint8Array) {

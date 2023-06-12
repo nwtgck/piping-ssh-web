@@ -16,7 +16,7 @@ export type GoWasmExported = {
       initialCols: number,
       initialRows: number,
       username: string,
-      termResizeMessagePort: MessagePort,
+      messagePort: MessagePort,
       authKeySets: AuthKeySetForSsh[],
     },
     functions: {

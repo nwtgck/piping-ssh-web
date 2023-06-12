@@ -42,6 +42,7 @@ type SSHOptions struct {
 	ResizeCh       <-chan TermWindow
 	AuthKeySets    []*AuthKeySet
 	OnConnected    func()
+	DisconnectCh   <-chan struct{}
 }
 
 // For delay passphrase input
@@ -137,6 +138,13 @@ func DoSsh(conn net.Conn, term *Term, options *SSHOptions) error {
 		return err
 	}
 	defer sshConn.Close()
+	go func() {
+		<-options.DisconnectCh
+		fmt.Println("disconnecting with chan")
+		if err := sshDisconnect(sshConn); err != nil {
+			fmt.Println("disconnect error", err)
+		}
+	}()
 	defer func() {
 		if err := sshDisconnect(sshConn); err != nil {
 			fmt.Println("disconnect error", err)

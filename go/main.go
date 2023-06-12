@@ -108,14 +108,25 @@ func jsDoSsh(this js.Value, args []js.Value) any {
 			return value.Bool(), err
 		}
 		resizeCh := make(chan TermWindow)
-		jsParams.Get("termResizeMessagePort").Set("onmessage", js.FuncOf(func(this js.Value, args []js.Value) any {
+		disconnectCh := make(chan struct{})
+		jsParams.Get("messagePort").Set("onmessage", js.FuncOf(func(this js.Value, args []js.Value) any {
 			data := args[0].Get("data")
-			go func() {
-				resizeCh <- TermWindow{
-					Cols: data.Get("cols").Int(),
-					Rows: data.Get("rows").Int(),
-				}
-			}()
+			dataType := data.Get("type").String()
+			switch dataType {
+			case "resize":
+				go func() {
+					resizeCh <- TermWindow{
+						Cols: data.Get("cols").Int(),
+						Rows: data.Get("rows").Int(),
+					}
+				}()
+			case "disconnect":
+				go func() {
+					disconnectCh <- struct{}{}
+				}()
+			default:
+				fmt.Println("unknown type", dataType)
+			}
 			return nil
 		}))
 		var authKeySets []*AuthKeySet
@@ -156,6 +167,7 @@ func jsDoSsh(this js.Value, args []js.Value) any {
 			OnConnected: func() {
 				jsFunctions.Call("onConnected")
 			},
+			DisconnectCh: disconnectCh,
 		})
 		if err != nil {
 			return nil, err
