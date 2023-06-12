@@ -1,19 +1,19 @@
 import * as Comlink from'comlink';
 import type {GoWasmWorkerObject} from "@/go-wasm-worker";
 
-let goWasmWorkerRemote = createGoWasmWorkerRemote();
+let [goWasmWorkerRemote, worker] = createGoWasmWorkerRemote();
 
-function createGoWasmWorkerRemote(): Comlink.Remote<GoWasmWorkerObject> {
-  return Comlink.wrap<GoWasmWorkerObject>(
-    new Worker(new URL('./go-wasm-worker.ts', import.meta.url))
-  );
+function createGoWasmWorkerRemote(): [Comlink.Remote<GoWasmWorkerObject>, Worker] {
+  const worker = new Worker(new URL('./go-wasm-worker.ts', import.meta.url));
+  return [Comlink.wrap<GoWasmWorkerObject>(worker), worker];
 }
 
 export async function aliveGoWasmWorkerRemotePromise(): Promise<Comlink.Remote<GoWasmWorkerObject>> {
   // recreate remote if existed
   if (await goWasmWorkerRemote.existed()) {
+    worker.terminate();
     console.warn("recreating remote...");
-    goWasmWorkerRemote = createGoWasmWorkerRemote();
+    [goWasmWorkerRemote, worker] = createGoWasmWorkerRemote();
   }
   return goWasmWorkerRemote;
 }
