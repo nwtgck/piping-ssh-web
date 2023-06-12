@@ -6,17 +6,29 @@ updates:
     interval: daily
     timezone: Asia/Tokyo
   open-pull-requests-limit: 99
-  reviewers:
-  - nwtgck
-  assignees:
-  - nwtgck
+  reviewers: [ nwtgck ]
+  assignees: [ nwtgck ]
+- package-ecosystem: gomod
+  directory: "/go"
+  schedule:
+    interval: daily
+    timezone: Asia/Tokyo
+  open-pull-requests-limit: 99
+  reviewers: [ nwtgck ]
+  assignees: [ nwtgck ]
+- package-ecosystem: gitsubmodule
+  directory: "/go/golang-crypto"
+  schedule:
+    interval: daily
+    timezone: Asia/Tokyo
+  open-pull-requests-limit: 99
+  reviewers: [ nwtgck ]
+  assignees: [ nwtgck ]
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
     interval: daily
     timezone: Asia/Tokyo
   open-pull-requests-limit: 99
-  reviewers:
-  - nwtgck
-  assignees:
-  - nwtgck
+  reviewers: [ nwtgck ]
+  assignees: [ nwtgck ]
