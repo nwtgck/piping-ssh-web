@@ -27,7 +27,7 @@
     "core-js": "^3.8.3",
     "url-join": "^5.0.0",
     "vue": "^3.2.13",
-    "vuetify": "^3.3.2",
+    "vuetify": "^3.3.4",
     "xterm": "^5.1.0",
     "xterm-addon-fit": "^0.7.0",
     "zod": "^3.21.4"
