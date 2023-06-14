@@ -61,13 +61,8 @@ export const goWasmExportedPromise: Promise<GoWasmExported> = (async () => {
     (globalThis as any).pipingSshGoExportResolve = resolve;
   });
   // TODO: use the same URL
-  const wasmGzUrl: string = typeof window === 'undefined' ? "../main.wasm.gz" : "main.wasm.gz";
-  const gzRes = await fetch(wasmGzUrl);
-  const res = new Response(gzRes.body!.pipeThrough(new DecompressionStream("gzip")), {
-    headers: {
-      "Content-Type": "application/wasm",
-    },
-  });
+  const wasmUrl: string = typeof window === 'undefined' ? "../main.wasm" : "main.wasm";
+  const res = await fetch(wasmUrl);
   const result = await WebAssembly.instantiateStreaming(res, go.importObject);
   go.run(result.instance);
   return await exportedPromise;

@@ -6,7 +6,7 @@
   "scripts": {
     "serve": "npm run patch-golang-crypto && concurrently -r 'vue-cli-service serve' 'npm run build-wasm-watch'",
     "patch-golang-crypto": "(cd go/golang-crypto && patch -p1 -N < ../golang-crypto.patch || true)",
-    "build-wasm": "(cd go && GOOS=js GOARCH=wasm go build -o ../public/main.wasm) && gzip -9kf public/main.wasm && cp \"$(go env GOROOT)/misc/wasm/wasm_exec.js\" ./public",
+    "build-wasm": "(cd go && GOOS=js GOARCH=wasm go build -o ../public/main.wasm) && cp \"$(go env GOROOT)/misc/wasm/wasm_exec.js\" ./public",
     "build-wasm-watch": "watch 'npm run build-wasm' go",
     "build": "npm run patch-golang-crypto && npm run build-wasm && vue-cli-service build"
   },
