@@ -234,6 +234,7 @@ function preloadForUserExperience() {
   import("xterm");
   import("xterm-addon-fit");
   import("@/components/PipingSsh.vue");
+  import("clipboard-copy");
   import("@/components/KeyManager.vue");
   import("@/components/KeysEditor.vue");
   import("@/components/KeyGenerator.vue");
