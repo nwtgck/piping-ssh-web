@@ -24,10 +24,10 @@
     "@vueuse/core": "^10.2.1",
     "clipboard-copy": "^4.0.1",
     "comlink": "^4.4.1",
-    "core-js": "^3.31.0",
+    "core-js": "^3.31.1",
     "url-join": "^5.0.0",
     "vue": "^3.2.13",
-    "vuetify": "^3.3.6",
+    "vuetify": "^3.3.9",
     "xterm": "^5.2.1",
     "xterm-addon-fit": "^0.7.0",
     "zod": "^3.21.4"
