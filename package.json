@@ -24,7 +24,7 @@
     "@vueuse/core": "^10.2.1",
     "clipboard-copy": "^4.0.1",
     "comlink": "^4.4.1",
-    "core-js": "^3.31.1",
+    "core-js": "^3.32.0",
     "url-join": "^5.0.0",
     "vue": "^3.2.13",
     "vuetify": "^3.3.10",
