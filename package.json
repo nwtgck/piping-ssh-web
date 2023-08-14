@@ -30,7 +30,7 @@
     "vuetify": "^3.3.10",
     "xterm": "^5.2.1",
     "xterm-addon-fit": "^0.7.0",
-    "zod": "^3.21.4"
+    "zod": "^3.22.0"
   },
   "devDependencies": {
     "@mdi/js": "^7.2.96",
