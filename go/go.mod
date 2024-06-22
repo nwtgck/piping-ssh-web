@@ -12,4 +12,4 @@ require (
 // All patch is written in ./golang-crypto.patch.
 replace golang.org/x/crypto => ./golang-crypto
 
-require golang.org/x/sys v0.8.0 // indirect
+require golang.org/x/sys v0.21.0 // indirect
