@@ -231,8 +231,8 @@ onMounted(() => {
 });
 
 function preloadForUserExperience() {
-  import("xterm");
-  import("xterm-addon-fit");
+  import("@xterm/xterm");
+  import("@xterm/addon-fit");
   import("@/components/PipingSsh.vue");
   import("clipboard-copy");
   import("@/components/KeyManager.vue");
@@ -263,7 +263,7 @@ async function saveAuthKeySet(authKeySet: AuthKeySet) {
   await storeAuthKeySet(authKeySet);
 }
 
-function randomString(len){
+function randomString(len: number){
   const nonConfusingChars = ["a", "b", "c", "d", "e", "f", "h", "i", "j", "k", "m", "n", "p", "r", "s", "t", "u", "v", "w", "x", "y", "z", "2", "3", "4", "5", "6", "7", "8"];
   const randomArr = window.crypto.getRandomValues(new Uint32Array(len));
   return Array.from(randomArr).map(n => nonConfusingChars[n % nonConfusingChars.length]).join('');
@@ -291,7 +291,7 @@ function setConfiguredUrl() {
   font-family: "Avenir Next", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  //text-align: center;
+  /* text-align: center; */
   color: #2c3e50;
   margin-top: 15px;
 }

@@ -19,11 +19,11 @@
 
 <script setup lang="ts">
 import {onMounted, ref} from "vue";
-import 'xterm/css/xterm.css';
+import '@xterm/xterm/css/xterm.css';
 import urlJoin from "url-join";
 import * as Comlink from 'comlink';
 import {mdiCheck, mdiKey, mdiCancel} from "@mdi/js";
-import {FitAddon} from 'xterm-addon-fit';
+import {FitAddon} from '@xterm/addon-fit';
 import type {AuthKeySetForSsh} from "@/go-wasm-exported-promise";
 import {ServerHostKeyManager} from "@/ServerHostKeyManager";
 import {AuthKeySet, storedAuthKeySets} from "@/authKeySets";
@@ -47,7 +47,7 @@ const emit = defineEmits<{
   (event: 'end'): void
 }>();
 
-const xtermPromise = () => import("xterm");
+const xtermPromise = () => import("@xterm/xterm");
 
 const connectionState = ref<"connecting" | "connected">("connecting");
 
