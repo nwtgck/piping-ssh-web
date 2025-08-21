@@ -36,7 +36,7 @@
     "@mdi/js": "^7.2.96",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-typescript": "~5.0.0",
-    "@vue/cli-service": "~5.0.0",
+    "@vue/cli-service": "~5.0.9",
     "concurrently": "^8.2.0",
     "typescript": "^5.2.2",
     "watch": "^0.13.0"
